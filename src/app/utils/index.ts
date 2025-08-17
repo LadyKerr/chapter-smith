@@ -1,0 +1,294 @@
+// Utility functions for Chapter Smith
+
+import { Chapter, ExportFormat } from '../types';
+
+// YouTube URL validation
+export const validateYouTubeURL = (url: string): boolean => {
+  const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}$/;
+  return youtubeRegex.test(url);
+};
+
+// Extract video ID from YouTube URL
+export const extractVideoId = (url: string): string | null => {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return match ? match[1] : null;
+};
+
+// Format time from seconds to MM:SS or HH:MM:SS
+export const formatTime = (seconds: number): string => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  if (hours > 0) {
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
+
+// Parse time string to seconds
+export const parseTimeToSeconds = (timeString: string): number => {
+  const parts = timeString.split(':').map(Number);
+  if (parts.length === 3) {
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  } else if (parts.length === 2) {
+    return parts[0] * 60 + parts[1];
+  }
+  return 0;
+};
+
+// Format chapters for different export formats
+export const formatChaptersForExport = (chapters: Chapter[], format: string): string => {
+  switch (format) {
+    case 'youtube':
+      return chapters
+        .map(chapter => `${chapter.timestamp} ${chapter.title}`)
+        .join('\n');
+    
+    case 'text':
+      return chapters
+        .map(chapter => `${chapter.timestamp} - ${chapter.title}${chapter.description ? '\n  ' + chapter.description : ''}`)
+        .join('\n\n');
+    
+    case 'json':
+      return JSON.stringify({ chapters }, null, 2);
+    
+    case 'csv':
+      const headers = 'Timestamp,Title,Description,Start Time (seconds)';
+      const rows = chapters.map(chapter => 
+        `"${chapter.timestamp}","${chapter.title}","${chapter.description || ''}",${chapter.startTime}`
+      );
+      return [headers, ...rows].join('\n');
+    
+    case 'srt':
+      return chapters
+        .map((chapter, index) => {
+          const nextChapter = chapters[index + 1];
+          const endTime = nextChapter ? nextChapter.startTime : chapter.startTime + 300; // 5 min default
+          return [
+            index + 1,
+            `${formatSRTTime(chapter.startTime)} --> ${formatSRTTime(endTime)}`,
+            chapter.title,
+            chapter.description || '',
+            ''
+          ].join('\n');
+        })
+        .join('\n');
+    
+    default:
+      return formatChaptersForExport(chapters, 'text');
+  }
+};
+
+// Format time for SRT format (HH:MM:SS,mmm)
+const formatSRTTime = (seconds: number): string => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  const milliseconds = Math.floor((seconds % 1) * 1000);
+
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')},${milliseconds.toString().padStart(3, '0')}`;
+};
+
+// Copy text to clipboard
+export const copyToClipboard = async (text: string): Promise<boolean> => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (error) {
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      return successful;
+    } catch (err) {
+      document.body.removeChild(textArea);
+      return false;
+    }
+  }
+};
+
+// Download file
+export const downloadFile = (content: string, filename: string, mimeType: string = 'text/plain'): void => {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+// Validate SRT file
+export const validateSRTFile = (file: File): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (!file.name.toLowerCase().endsWith('.srt')) {
+      resolve(false);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      // Basic SRT format validation - should contain numbered entries with timestamps
+      const srtPattern = /^\d+\s*\n\d{2}:\d{2}:\d{2},\d{3}\s*-->\s*\d{2}:\d{2}:\d{2},\d{3}\s*\n/m;
+      resolve(srtPattern.test(content));
+    };
+    reader.onerror = () => resolve(false);
+    reader.readAsText(file);
+  });
+};
+
+// Parse paste event to extract URL
+export const extractURLFromPaste = (event: ClipboardEvent): string | null => {
+  const clipboardData = event.clipboardData?.getData('text');
+  if (!clipboardData) return null;
+
+  // Try to find a YouTube URL in the pasted text
+  const urlMatch = clipboardData.match(/(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}/);
+  return urlMatch ? urlMatch[0] : null;
+};
+
+// Debounce function for input validation
+export const debounce = <T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): ((...args: Parameters<T>) => void) => {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(null, args), wait);
+  };
+};
+
+// Available export formats
+export const EXPORT_FORMATS: ExportFormat[] = [
+  {
+    id: 'youtube',
+    name: 'YouTube Description',
+    description: 'Perfect for pasting directly into your video description',
+    icon: 'youtube',
+    mimeType: 'text/plain',
+    extension: 'txt'
+  },
+  {
+    id: 'text',
+    name: 'Plain Text',
+    description: 'Simple timestamps with chapter titles',
+    icon: 'document',
+    mimeType: 'text/plain',
+    extension: 'txt'
+  },
+  {
+    id: 'json',
+    name: 'JSON Format',
+    description: 'Structured data for developers',
+    icon: 'code',
+    mimeType: 'application/json',
+    extension: 'json'
+  },
+  {
+    id: 'csv',
+    name: 'CSV Format',
+    description: 'Spreadsheet compatible format',
+    icon: 'table',
+    mimeType: 'text/csv',
+    extension: 'csv'
+  },
+  {
+    id: 'srt',
+    name: 'SRT Subtitles',
+    description: 'Subtitle file format',
+    icon: 'subtitles',
+    mimeType: 'text/srt',
+    extension: 'srt'
+  }
+];
+
+// API stub functions (to be implemented with real backend)
+export const api = {
+  validateURL: async (url: string): Promise<{ valid: boolean; videoInfo?: any; error?: string }> => {
+    // Stub implementation
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    if (!validateYouTubeURL(url)) {
+      return { valid: false, error: 'Invalid YouTube URL' };
+    }
+
+    // Mock successful response
+    return {
+      valid: true,
+      videoInfo: {
+        id: extractVideoId(url),
+        title: 'Sample Video Title',
+        duration: '1:23:45',
+        url,
+        thumbnailUrl: `https://img.youtube.com/vi/${extractVideoId(url)}/maxresdefault.jpg`
+      }
+    };
+  },
+
+  generateChapters: async (url: string): Promise<{ chapters: Chapter[]; error?: string }> => {
+    // Stub implementation with mock chapters
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    return {
+      chapters: [
+        {
+          id: '1',
+          timestamp: '00:00',
+          title: 'Introduction and Setup',
+          description: 'Getting started with the project structure and initial configuration',
+          startTime: 0
+        },
+        {
+          id: '2',
+          timestamp: '03:42',
+          title: 'Installing Dependencies',
+          description: 'Setting up the required packages and development environment',
+          startTime: 222
+        },
+        {
+          id: '3',
+          timestamp: '08:15',
+          title: 'Building the UI',
+          description: 'Creating the user interface components',
+          startTime: 495
+        }
+      ]
+    };
+  },
+
+  uploadSRT: async (file: File): Promise<{ chapters: Chapter[]; error?: string }> => {
+    // Stub implementation
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const isValid = await validateSRTFile(file);
+    if (!isValid) {
+      return { chapters: [], error: 'Invalid SRT file format' };
+    }
+
+    return {
+      chapters: [
+        {
+          id: '1',
+          timestamp: '00:00',
+          title: 'Chapter from SRT',
+          description: 'Generated from uploaded SRT file',
+          startTime: 0
+        }
+      ]
+    };
+  }
+};
