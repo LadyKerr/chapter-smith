@@ -1,5 +1,9 @@
 {
   "name": "chapter-smith",
+  "description": "Turn any YouTube URL into polished, timestamped chapters—built by autonomous Claude sub-agents",
+  "author": {
+    "name": "LadyKerr"
+  },
   "version": "0.1.0",
   "private": true,
   "scripts": {
