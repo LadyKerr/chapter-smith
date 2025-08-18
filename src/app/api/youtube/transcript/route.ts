@@ -307,7 +307,7 @@ async function fetchTranscript(
     console.log(`Executing Python script: ${pythonPath} ${pythonScript} ${videoId}`);
     
     const { stdout, stderr } = await execFileAsync(pythonPath, [pythonScript, videoId], {
-      pythonPath: 30000, // 30 second timeout
+      timeout: 30000, // 30 second timeout
       maxBuffer: 10 * 1024 * 1024 // 10MB buffer for large transcripts
     });
 
