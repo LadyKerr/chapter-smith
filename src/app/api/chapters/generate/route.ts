@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
+import Anthropic from '@anthropic-ai/sdk';
 import { 
   APIResponse, 
   ChapterGenerationRequest,
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     };
 
     let transcript: YouTubeTranscriptSegment[];
-    let videoInfo: any = null;
+    let videoInfo: VideoInfo | null = null;
 
     // If transcript not provided, fetch it
     if (!body.transcript) {
@@ -501,10 +502,23 @@ async function fetchTranscript(videoIdOrUrl: string): Promise<APIResponse<any>> 
 /**
  * Generate chapters using AI (Claude/Anthropic)
  */
+interface VideoInfo {
+  title?: string;
+  duration?: number;
+  id?: string;
+}
+
+interface ChapterOptions {
+  minChapterLength: number;
+  maxChapters: number;
+  includeDescriptions: boolean;
+  language: string;
+}
+
 async function generateChaptersWithAI(
   transcript: YouTubeTranscriptSegment[],
-  videoInfo: any,
-  options: any
+  videoInfo: VideoInfo,
+  options: ChapterOptions
 ): Promise<GeneratedChapter[]> {
   const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
   if (!anthropicApiKey) {
@@ -515,6 +529,11 @@ async function generateChaptersWithAI(
       503
     );
   }
+
+  // Initialize Anthropic client
+  const client = new Anthropic({
+    apiKey: anthropicApiKey
+  });
 
   // Prepare transcript text
   const transcriptText = transcript
@@ -532,42 +551,32 @@ async function generateChaptersWithAI(
     .replace('{includeDescriptions}', options.includeDescriptions.toString());
 
   try {
-    // Call Anthropic API
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicApiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: DEFAULT_AI_CONFIG.model,
-        max_tokens: DEFAULT_AI_CONFIG.maxTokens,
-        temperature: DEFAULT_AI_CONFIG.temperature,
-        system: DEFAULT_AI_CONFIG.systemPrompt,
-        messages: [
-          {
-            role: 'user',
-            content: userPrompt
-          }
-        ]
-      })
+    // Call Anthropic API using SDK
+    const message = await client.messages.create({
+      model: DEFAULT_AI_CONFIG.model,
+      max_tokens: DEFAULT_AI_CONFIG.maxTokens,
+      temperature: DEFAULT_AI_CONFIG.temperature,
+      system: DEFAULT_AI_CONFIG.systemPrompt,
+      messages: [
+        {
+          role: 'user',
+          content: userPrompt
+        }
+      ]
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+    const content = message.content[0];
+    if (content.type !== 'text') {
       throw new AIServiceError(
-        APIErrorCode.AI_SERVICE_UNAVAILABLE,
-        `AI service error: ${response.status}`,
-        { status: response.status, error: errorData },
-        response.status
+        APIErrorCode.CHAPTER_GENERATION_FAILED,
+        'Invalid response type from AI service',
+        null,
+        500
       );
     }
 
-    const data = await response.json();
-    const content = data.content?.[0]?.text;
-
-    if (!content) {
+    const responseText = content.text;
+    if (!responseText) {
       throw new AIServiceError(
         APIErrorCode.CHAPTER_GENERATION_FAILED,
         'No content received from AI service',
@@ -577,12 +586,12 @@ async function generateChaptersWithAI(
     }
 
     // Parse JSON response
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new AIServiceError(
         APIErrorCode.CHAPTER_GENERATION_FAILED,
         'Invalid response format from AI service',
-        { content },
+        { content: responseText },
         500
       );
     }
@@ -600,7 +609,7 @@ async function generateChaptersWithAI(
     }
 
     // Convert to our chapter format
-    return chapters.map((chapter: any, index: number) => ({
+    return chapters.map((chapter: { title: string; description: string; startTime: number; endTime: number; confidence?: number; keywords?: string[] }, index: number) => ({
       id: generateChapterId(index),
       timestamp: formatTime(chapter.startTime),
       title: chapter.title,
@@ -613,6 +622,17 @@ async function generateChaptersWithAI(
 
   } catch (error) {
     if (error instanceof AIServiceError) throw error;
+    
+    // Handle Anthropic SDK errors
+    if (error instanceof Error && 'status' in error) {
+      const anthropicError = error as { status: number; message: string };
+      throw new AIServiceError(
+        APIErrorCode.AI_SERVICE_UNAVAILABLE,
+        `AI service error: ${anthropicError.status}`,
+        { status: anthropicError.status, message: anthropicError.message },
+        anthropicError.status
+      );
+    }
     
     throw new AIServiceError(
       APIErrorCode.AI_SERVICE_UNAVAILABLE,
@@ -629,7 +649,7 @@ async function generateChaptersWithAI(
 function postProcessChapters(
   chapters: GeneratedChapter[],
   totalDuration: number,
-  options: any
+  options: ChapterOptions
 ): GeneratedChapter[] {
   // Sort by start time
   chapters.sort((a, b) => a.startTime - b.startTime);
@@ -731,7 +751,7 @@ function createSuccessResponse<T>(data: T): NextResponse {
 function createErrorResponse(
   code: APIErrorCode,
   message: string,
-  details: any = null,
+  details: unknown = null,
   status: number = 500
 ): NextResponse {
   const response: APIResponse<never> = {
@@ -756,7 +776,7 @@ class AIServiceError extends Error {
   constructor(
     public code: APIErrorCode,
     message: string,
-    public details: any = null,
+    public details: unknown = null,
     public statusCode: number = 500
   ) {
     super(message);
