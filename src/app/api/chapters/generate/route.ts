@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+import path from 'path';
 import { 
   APIResponse, 
   ChapterGenerationRequest,
@@ -10,6 +13,8 @@ import {
   AIModelConfig,
   ProcessingMetrics
 } from '../../../types/api';
+
+const execFileAsync = promisify(execFile);
 
 // AI model configuration
 const DEFAULT_AI_CONFIG: AIModelConfig = {
@@ -215,10 +220,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     console.error('Chapter generation error:', error);
     
+    let requestBody: ChapterGenerationRequest | undefined;
+    try {
+      requestBody = await request.json();
+    } catch {
+      // Request body parsing failed
+    }
+    
     // Log error metrics
     await logProcessingMetrics({
       requestId,
-      videoId: body?.videoId || 'unknown',
+      videoId: requestBody?.videoId || 'unknown',
       chapterGenerationTimeMs: Date.now() - startTime,
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -350,28 +362,134 @@ function validateChapterRequest(body: ChapterGenerationRequest): ValidationResul
 }
 
 /**
- * Fetch transcript from our internal API
+ * Extract video ID from YouTube URL or return the ID if already provided
+ */
+function extractVideoId(videoIdOrUrl: string): string {
+  if (videoIdOrUrl.includes('youtube.com') || videoIdOrUrl.includes('youtu.be')) {
+    // Extract video ID from YouTube URL
+    const urlPatterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
+      /youtube\.com\/embed\/([^&\n?#]+)/,
+      /youtube\.com\/v\/([^&\n?#]+)/
+    ];
+    
+    for (const pattern of urlPatterns) {
+      const match = videoIdOrUrl.match(pattern);
+      if (match) {
+        return match[1];
+      }
+    }
+    throw new Error('Invalid YouTube URL format');
+  }
+  return videoIdOrUrl; // Assume it's already a video ID
+}
+
+/**
+ * Fetch transcript using Python script
  */
 async function fetchTranscript(videoIdOrUrl: string): Promise<APIResponse<any>> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/youtube/transcript`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        [videoIdOrUrl.includes('youtube.com') || videoIdOrUrl.includes('youtu.be') ? 'url' : 'videoId']: videoIdOrUrl
-      })
+    const videoId = extractVideoId(videoIdOrUrl);
+    const scriptPath = path.join(process.cwd(), 'api_caps.py');
+    
+    // Execute Python script with video ID using virtual environment
+    const venvPython = path.join(process.cwd(), 'venv', 'bin', 'python3');
+    const { stdout, stderr } = await execFileAsync(venvPython, [scriptPath, videoId], {
+      timeout: 30000, // 30 second timeout
+      maxBuffer: 10 * 1024 * 1024 // 10MB buffer for large transcripts
     });
 
-    return await response.json();
+    if (stderr && stderr.trim()) {
+      console.warn('Python script stderr:', stderr);
+    }
+
+    // Parse the JSON output from the Python script
+    const transcriptData = JSON.parse(stdout);
+    
+    // Convert Python script output to expected format
+    const segments: YouTubeTranscriptSegment[] = transcriptData.transcript.map((segment: any) => ({
+      text: segment.text,
+      start: segment.start,
+      duration: segment.duration || 1 // Default duration if not provided
+    }));
+
+    return {
+      success: true,
+      data: {
+        videoId: videoId,
+        title: transcriptData.title || 'Untitled Video',
+        duration: transcriptData.duration || Math.max(...segments.map(s => s.start + s.duration)),
+        segments: segments
+      },
+      timestamp: new Date().toISOString(),
+      version: '1.0.0'
+    };
+
   } catch (error) {
+    console.error('Python script execution error:', error);
+    
+    // Handle specific error types
+    if (error instanceof Error) {
+      if (error.message.includes('ENOENT')) {
+        return {
+          success: false,
+          error: {
+            code: APIErrorCode.EXTERNAL_SERVICE_ERROR,
+            message: 'Python script not found. Ensure api_caps.py exists in the project root.',
+            details: { scriptPath: path.join(process.cwd(), 'api_caps.py') }
+          },
+          timestamp: new Date().toISOString(),
+          version: '1.0.0'
+        };
+      }
+      
+      if (error.message.includes('timeout')) {
+        return {
+          success: false,
+          error: {
+            code: APIErrorCode.EXTERNAL_SERVICE_ERROR,
+            message: 'Transcript fetch timeout. The video may be too long or unavailable.',
+            details: { timeout: '30s' }
+          },
+          timestamp: new Date().toISOString(),
+          version: '1.0.0'
+        };
+      }
+
+      // Try to parse error output for specific transcript issues
+      const errorMessage = error.message.toLowerCase();
+      if (errorMessage.includes('transcript') && errorMessage.includes('disabled')) {
+        return {
+          success: false,
+          error: {
+            code: APIErrorCode.NO_TRANSCRIPT_AVAILABLE,
+            message: 'Transcript is disabled for this video',
+            details: error.message
+          },
+          timestamp: new Date().toISOString(),
+          version: '1.0.0'
+        };
+      }
+      
+      if (errorMessage.includes('video') && errorMessage.includes('unavailable')) {
+        return {
+          success: false,
+          error: {
+            code: APIErrorCode.NO_TRANSCRIPT_AVAILABLE,
+            message: 'Video is unavailable or private',
+            details: error.message
+          },
+          timestamp: new Date().toISOString(),
+          version: '1.0.0'
+        };
+      }
+    }
+
     return {
       success: false,
       error: {
         code: APIErrorCode.EXTERNAL_SERVICE_ERROR,
-        message: 'Failed to fetch transcript',
+        message: 'Failed to fetch transcript using Python script',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       timestamp: new Date().toISOString(),
