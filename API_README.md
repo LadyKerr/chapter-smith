@@ -8,7 +8,6 @@ Create a `.env.local` file in the project root:
 
 ```bash
 # Required
-YOUTUBE_API_KEY=your_youtube_api_key_here
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
 
 # Optional
@@ -19,9 +18,13 @@ NODE_ENV=development
 ### 2. Install Dependencies
 
 ```bash
+# Install Node.js dependencies
 npm install
-# The API endpoints will work with or without youtube-transcript
-# If youtube-transcript fails to install, fallback methods will be used
+
+# Set up Python environment for reliable transcript fetching
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install youtube-transcript-api
 ```
 
 ### 3. Start Development Server
@@ -36,12 +39,12 @@ npm run dev
 # Health check
 curl http://localhost:3000/api/health
 
-# Test transcript fetching
-curl -X POST http://localhost:3000/api/youtube/transcript \
+# Test chapter generation (includes transcript fetching)
+curl -X POST http://localhost:3000/api/chapters/generate \
   -H "Content-Type: application/json" \
-  -d '{"url": "https://youtube.com/watch?v=dQw4w9WgXcQ"}'
+  -d '{"videoId": "dQw4w9WgXcQ", "options": {"maxChapters": 5}}'
 
-# Test chapter generation
+# Test with YouTube URL
 curl -X POST http://localhost:3000/api/chapters/generate \
   -H "Content-Type: application/json" \
   -d '{"url": "https://youtube.com/watch?v=dQw4w9WgXcQ"}'
@@ -52,17 +55,14 @@ curl -X POST http://localhost:3000/api/chapters/generate \
 ### Health Check
 - **GET** `/api/health` - System health and service status
 
-### YouTube Transcript
-- **POST** `/api/youtube/transcript` - Fetch video transcripts
-- Supports YouTube URLs and video IDs
-- Language preference and fallback options
-- Auto-generated transcript detection
-
 ### Chapter Generation  
-- **POST** `/api/chapters/generate` - Generate chapters from transcripts
-- AI-powered content analysis using Claude 3 Haiku
+- **POST** `/api/chapters/generate` - Generate chapters from YouTube videos
+- **Integrated transcript fetching** using Python script with `youtube-transcript-api`
+- Supports YouTube URLs and video IDs
+- AI-powered content analysis using Claude 3 Haiku and Anthropic SDK
 - Customizable chapter length and count
 - Confidence scoring and keyword extraction
+- Language preference and fallback options
 
 ### Chapter Export
 - **POST** `/api/chapters/export` - Export chapters in multiple formats
@@ -77,18 +77,16 @@ src/app/
 ├── api/
 │   ├── chapters/
 │   │   ├── generate/
-│   │   │   └── route.ts      # Chapter generation endpoint
+│   │   │   └── route.ts      # Chapter generation with integrated transcript fetching
 │   │   └── export/
 │   │       └── route.ts      # Chapter export endpoint
-│   ├── youtube/
-│   │   └── transcript/
-│   │       └── route.ts      # Transcript fetching endpoint
 │   └── health/
 │       └── route.ts          # Health check endpoint
 ├── types/
 │   └── api.ts               # TypeScript interfaces
-└── utils/
-    └── index.ts             # Updated with API integration
+├── utils/
+│   └── index.ts             # Updated with API integration
+└── api_caps.py              # Python script for YouTube transcript fetching
 ```
 
 ## Key Features
@@ -101,9 +99,9 @@ src/app/
 - TypeScript type safety throughout
 
 ### External Service Integration
-- **YouTube Data API v3**: Video metadata and validation
-- **Anthropic Claude API**: AI-powered chapter generation
-- **YouTube Transcript API**: Multiple fallback methods for transcript fetching
+- **Anthropic Claude API**: AI-powered chapter generation using TypeScript SDK
+- **Python Script Integration**: Reliable YouTube transcript fetching with `youtube-transcript-api`
+- **Child Process Management**: Secure execution of Python scripts from Node.js
 
 ### Export Formats
 - **YouTube**: Optimized for video descriptions
@@ -122,12 +120,15 @@ src/app/
 
 ## Configuration
 
-### YouTube API Setup
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create/select project
-3. Enable YouTube Data API v3
-4. Create API key
-5. Restrict to YouTube Data API v3
+### Python Environment Setup
+The application requires Python 3.9+ for transcript fetching:
+
+```bash
+# Ensure Python virtual environment exists
+python3 -m venv venv
+source venv/bin/activate
+pip install youtube-transcript-api>=1.2.2
+```
 
 ### Anthropic API Setup
 1. Visit [Anthropic Console](https://console.anthropic.com/)
@@ -201,29 +202,51 @@ artillery quick --count 10 --num 5 http://localhost:3000/api/health
 
 ### Environment Variables
 Ensure all required environment variables are set:
-- `YOUTUBE_API_KEY` (required)
-- `ANTHROPIC_API_KEY` (required)
+- `ANTHROPIC_API_KEY` (required) - Your Anthropic Claude API key
 - `NEXT_PUBLIC_APP_URL` (for internal API calls)
+
+### Python Dependencies
+Ensure the virtual environment is set up with required packages:
+- `youtube-transcript-api>=1.2.2`
 
 ### Platform Specific
 
 #### Vercel
 ```bash
-vercel env add YOUTUBE_API_KEY
 vercel env add ANTHROPIC_API_KEY
 vercel deploy
 ```
+
+**Note:** Ensure your deployment platform supports Python 3.9+ runtime and install the required Python packages during build.
 
 #### Docker
 ```dockerfile
 FROM node:20-alpine
 WORKDIR /app
+
+# Install Python and pip
+RUN apk add --no-cache python3 py3-pip python3-dev
+
+# Install Python dependencies
+COPY api_caps.py requirements.txt* ./
+RUN python3 -m venv venv && \
+    source venv/bin/activate && \
+    pip install youtube-transcript-api>=1.2.2
+
+# Install Node.js dependencies
 COPY package*.json ./
 RUN npm ci --only=production
+
 COPY . .
 RUN npm run build
+
 EXPOSE 3000
 CMD ["npm", "start"]
+```
+
+Create a `requirements.txt` file:
+```
+youtube-transcript-api>=1.2.2
 ```
 
 #### Railway/Render
@@ -233,10 +256,10 @@ Set environment variables in platform dashboard and deploy from Git.
 
 ### Common Issues
 
-1. **YouTube API Quota Exceeded**
-   - Check quota usage in Google Cloud Console
-   - Implement request caching
-   - Request quota increase if needed
+1. **Python Environment Issues**
+   - Ensure Python 3.9+ is installed
+   - Verify virtual environment is activated
+   - Check that `youtube-transcript-api` is installed in venv
 
 2. **Anthropic API Rate Limits**
    - Monitor usage in Anthropic Console
@@ -245,10 +268,16 @@ Set environment variables in platform dashboard and deploy from Git.
 
 3. **Transcript Not Available**
    - Video may have captions disabled
-   - Try different language preferences
+   - Try different language preferences  
+   - Check if video is private or region-locked
    - Use SRT upload fallback
 
-4. **CORS Issues**
+4. **Python Script Execution Errors**
+   - Check that `api_caps.py` exists in project root
+   - Verify virtual environment path is correct
+   - Check Python script output for specific errors
+
+5. **CORS Issues**
    - Ensure correct NEXT_PUBLIC_APP_URL
    - Check domain configuration
    - Verify API endpoint URLs
