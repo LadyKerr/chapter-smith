@@ -45,7 +45,7 @@ export async function GET(): Promise<NextResponse> {
           method: 'HEAD',
           headers: {
             'x-api-key': anthropicApiKey,
-            'anthropic-version': '2023-06-01'
+            'Content-Type': 'application/json'
           },
           signal: AbortSignal.timeout(5000) // 5 second timeout
         });

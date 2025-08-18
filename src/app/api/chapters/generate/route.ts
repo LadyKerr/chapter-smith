@@ -13,7 +13,7 @@ import {
 
 // AI model configuration
 const DEFAULT_AI_CONFIG: AIModelConfig = {
-  model: 'claude-3-haiku', // Using Claude 3 Haiku for faster, cost-effective processing
+  model: 'claude-3-5-haiku-20241022', // Using Claude 3 Haiku for faster, cost-effective processing
   temperature: 0.3,
   maxTokens: 4000,
   systemPrompt: `You are an expert at analyzing video transcripts and creating meaningful chapter divisions. 
