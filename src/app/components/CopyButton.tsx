@@ -34,7 +34,7 @@ export default function CopyButton({
       } else {
         throw new Error('Copy failed');
       }
-    } catch (error) {
+    } catch {
       setCopyState('error');
       onCopyComplete?.(false);
       setTimeout(() => setCopyState('idle'), 3000);

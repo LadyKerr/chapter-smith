@@ -115,7 +115,7 @@ export interface APIErrorResponse {
   error: {
     code: string;
     message: string;
-    details?: any;
+    details?: unknown;
     stack?: string; // Only in development
   };
   timestamp: string;
@@ -135,7 +135,7 @@ export interface ValidationError {
   field: string;
   code: string;
   message: string;
-  value?: any;
+  value?: unknown;
 }
 
 export interface ValidationWarning {
@@ -246,7 +246,7 @@ export enum WebhookEvent {
 
 export interface WebhookPayload {
   event: WebhookEvent;
-  data: any;
+  data: unknown;
   timestamp: string;
   requestId: string;
 }

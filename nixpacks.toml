@@ -1,0 +1,8 @@
+[build]
+nixpkgs = ['nodejs_18', 'python3', 'pip', 'python3Packages.pip']
+
+[install]
+python = 'pip install -r requirements.txt'
+
+[variables]
+NODE_ENV = 'production'

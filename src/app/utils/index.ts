@@ -1,6 +1,6 @@
 // Utility functions for Chapter Smith
 
-import { Chapter, ExportFormat } from '../types';
+import { Chapter, ExportFormat, VideoInfo } from '../types';
 
 // YouTube URL validation
 export const validateYouTubeURL = (url: string): boolean => {
@@ -95,7 +95,7 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
   try {
     await navigator.clipboard.writeText(text);
     return true;
-  } catch (error) {
+  } catch {
     // Fallback for older browsers
     const textArea = document.createElement('textarea');
     textArea.value = text;
@@ -110,7 +110,7 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
       const successful = document.execCommand('copy');
       document.body.removeChild(textArea);
       return successful;
-    } catch (err) {
+    } catch {
       document.body.removeChild(textArea);
       return false;
     }
@@ -161,14 +161,15 @@ export const extractURLFromPaste = (event: ClipboardEvent): string | null => {
 };
 
 // Debounce function for input validation
-export const debounce = <T extends (...args: any[]) => any>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const debounce = <T extends (...args: any[]) => void>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
   let timeout: NodeJS.Timeout;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(null, args), wait);
+    timeout = setTimeout(() => func(...args), wait);
   };
 };
 
@@ -218,7 +219,7 @@ export const EXPORT_FORMATS: ExportFormat[] = [
 
 // Production API functions integrated with backend endpoints
 export const api = {
-  validateURL: async (url: string): Promise<{ valid: boolean; videoInfo?: any; error?: string }> => {
+  validateURL: async (url: string): Promise<{ valid: boolean; videoInfo?: VideoInfo; error?: string }> => {
     try {
       if (!validateYouTubeURL(url)) {
         return { valid: false, error: 'Invalid YouTube URL format' };
@@ -252,8 +253,8 @@ export const api = {
           thumbnailUrl: `https://img.youtube.com/vi/${result.data.videoId}/maxresdefault.jpg`
         }
       };
-    } catch (error) {
-      console.error('URL validation error:', error);
+    } catch {
+      console.error('URL validation error');
       return { 
         valid: false, 
         error: 'Network error. Please check your connection and try again.' 
@@ -281,7 +282,7 @@ export const api = {
       }
 
       // Transform API response to expected format
-      const chapters: Chapter[] = result.data.chapters.map((chapter: any) => ({
+      const chapters: Chapter[] = result.data.chapters.map((chapter: { id: string; title: string; timestamp: string; startTime: number; description?: string }) => ({
         id: chapter.id,
         timestamp: chapter.timestamp,
         title: chapter.title,
@@ -290,8 +291,8 @@ export const api = {
       }));
 
       return { chapters };
-    } catch (error) {
-      console.error('Chapter generation error:', error);
+    } catch {
+      console.error('Chapter generation error');
       return { 
         chapters: [], 
         error: 'Failed to generate chapters. Please try again.' 
@@ -315,8 +316,8 @@ export const api = {
       }
 
       return { chapters: parsedChapters };
-    } catch (error) {
-      console.error('SRT upload error:', error);
+    } catch {
+      console.error('SRT upload error');
       return { 
         chapters: [], 
         error: 'Failed to process SRT file. Please check the format and try again.' 
@@ -324,7 +325,7 @@ export const api = {
     }
   },
 
-  exportChapters: async (chapters: Chapter[], format: string, videoInfo?: any): Promise<{ content: string; filename: string; mimeType: string; error?: string }> => {
+  exportChapters: async (chapters: Chapter[], format: string, videoInfo?: VideoInfo): Promise<{ content: string; filename: string; mimeType: string; error?: string }> => {
     try {
       const response = await fetch('/api/chapters/export', {
         method: 'POST',
@@ -359,8 +360,8 @@ export const api = {
         filename: result.data.filename,
         mimeType: result.data.mimeType
       };
-    } catch (error) {
-      console.error('Export error:', error);
+    } catch {
+      console.error('Export error');
       return { 
         content: '', 
         filename: '', 

@@ -289,10 +289,10 @@ INCLUDE:
 ```
 
 Claude delivered:
-    - /api/youtube/transcript
-    - /api/upload/srt
-    - /api/generate
-    - /api/export
+- /api/youtube/transcript
+- /api/upload/srt
+- /api/generate
+ - /api/export
 
 With docs that felt enterprise-ready 💃🏼
 

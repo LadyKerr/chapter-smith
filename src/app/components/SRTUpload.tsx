@@ -42,6 +42,7 @@ export default function SRTUpload({
     if (files.length > 0) {
       await handleFileSelection(files[0]);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFileSelection = async (file: File) => {
@@ -66,7 +67,7 @@ export default function SRTUpload({
         setValidationError('Invalid SRT file format. Please check your file.');
         return;
       }
-    } catch (error) {
+    } catch {
       setValidationError('Could not read the file. Please try again.');
       return;
     }
@@ -119,7 +120,7 @@ export default function SRTUpload({
           </div>
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">Transcript Not Available</h2>
           <p className="text-base text-gray-600">
-            The video's transcript couldn't be retrieved automatically. 
+            The video&apos;s transcript couldn&apos;t be retrieved automatically. 
             You can upload your own .srt file to continue.
           </p>
         </div>
@@ -247,9 +248,9 @@ export default function SRTUpload({
 
         {/* Help Section */}
         <div className="mt-8 p-4 bg-gray-50 rounded-lg animate-fade-in delay-500">
-          <h3 className="text-sm font-medium text-gray-900 mb-2">Don't have a transcript file?</h3>
+          <h3 className="text-sm font-medium text-gray-900 mb-2">Don&apos;t have a transcript file?</h3>
           <p className="text-sm text-gray-600 mb-3">
-            You can create .srt files using YouTube's built-in captions or transcript generation tools.
+            You can create .srt files using YouTube&apos;s built-in captions or transcript generation tools.
           </p>
           <button
             type="button"

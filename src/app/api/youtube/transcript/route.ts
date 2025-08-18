@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+import * as path from 'path';
 // Note: youtube-transcript is imported dynamically to handle optional dependency
 import { 
   APIResponse, 
@@ -6,13 +9,12 @@ import {
   APIErrorCode,
   ValidationResult,
   TranscriptFetchOptions,
-  YouTubeVideoInfo,
   YouTubeTranscriptSegment
 } from '../../../types/api';
 
-// Rate limiting configuration
-const RATE_LIMIT_REQUESTS = 100; // requests per hour
-const RATE_LIMIT_WINDOW = 3600; // 1 hour in seconds
+// Rate limiting configuration (for future use)
+// const RATE_LIMIT_REQUESTS = 100; // requests per hour
+// const RATE_LIMIT_WINDOW = 3600; // 1 hour in seconds
 
 // Request body validation schema
 interface TranscriptRequest {
@@ -60,7 +62,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Extract video ID from URL or use provided videoId
-    videoId = body.videoId || extractVideoIdFromUrl(body.url!);
+    videoId = body.videoId || extractVideoIdFromUrl(body.url!) || undefined;
     if (!videoId) {
       return createErrorResponse(
         APIErrorCode.INVALID_VIDEO_ID,
@@ -162,26 +164,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-/**
- * Validate environment configuration
- */
-function validateEnvironment(): { isValid: boolean; missing: string[] } {
-  const missing: string[] = [];
-  
-  if (!process.env.YOUTUBE_API_KEY) {
-    missing.push('YOUTUBE_API_KEY');
-  }
-  
-  // Optional: validate API key format (should be ~39 characters starting with AIza)
-  if (process.env.YOUTUBE_API_KEY && !process.env.YOUTUBE_API_KEY.startsWith('AIza')) {
-    console.warn('YouTube API key format appears invalid - should start with "AIza"');
-  }
-  
-  return {
-    isValid: missing.length === 0,
-    missing
-  };
-}
+// Environment validation function (unused for now, but kept for future use)
+// function validateEnvironment(): { isValid: boolean; missing: string[] } {
+//   const missing: string[] = [];
+//   
+//   if (!process.env.YOUTUBE_API_KEY) {
+//     missing.push('YOUTUBE_API_KEY');
+//   }
+//   
+//   // Optional: validate API key format (should be ~39 characters starting with AIza)
+//   if (process.env.YOUTUBE_API_KEY && !process.env.YOUTUBE_API_KEY.startsWith('AIza')) {
+//     console.warn('YouTube API key format appears invalid - should start with "AIza"');
+//   }
+//   
+//   return {
+//     isValid: missing.length === 0,
+//     missing
+//   };
+// }
 
 /**
  * Validate transcript request body
@@ -281,83 +281,8 @@ function isValidVideoId(videoId: string): boolean {
   return /^[a-zA-Z0-9_-]{11}$/.test(videoId);
 }
 
-/**
- * Fetch video information from YouTube Data API v3
- */
-async function fetchVideoInfo(videoId: string): Promise<YouTubeVideoInfo | null> {
-  const apiKey = process.env.YOUTUBE_API_KEY;
-  if (!apiKey) {
-    throw new YouTubeAPIError(
-      APIErrorCode.CONFIGURATION_ERROR,
-      'YouTube API key not configured',
-      null,
-      500
-    );
-  }
-  
-  console.log(`Fetching video info for ID: ${videoId}`);
-
-  const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet,contentDetails,statistics&key=${apiKey}`;
-  
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'ChapterSmith/1.0'
-      }
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`YouTube API error: ${response.status} - ${errorText}`);
-      
-      throw new YouTubeAPIError(
-        APIErrorCode.EXTERNAL_SERVICE_ERROR,
-        `YouTube API error: ${response.status}`,
-        { 
-          status: response.status, 
-          statusText: response.statusText,
-          errorBody: errorText,
-          url: url
-        },
-        response.status
-      );
-    }
-
-    const data = await response.json();
-    
-    if (!data.items || data.items.length === 0) {
-      return null; // Video not found or private
-    }
-
-    const video = data.items[0];
-    const snippet = video.snippet;
-    const contentDetails = video.contentDetails;
-    const statistics = video.statistics;
-
-    return {
-      id: videoId,
-      title: snippet.title,
-      description: snippet.description,
-      duration: contentDetails.duration,
-      channelTitle: snippet.channelTitle,
-      publishedAt: snippet.publishedAt,
-      thumbnailUrl: snippet.thumbnails?.maxresdefault?.url || snippet.thumbnails?.high?.url,
-      viewCount: statistics?.viewCount,
-      likeCount: statistics?.likeCount,
-      url: `https://www.youtube.com/watch?v=${videoId}`
-    };
-
-  } catch (error) {
-    if (error instanceof YouTubeAPIError) throw error;
-    
-    throw new YouTubeAPIError(
-      APIErrorCode.EXTERNAL_SERVICE_ERROR,
-      'Failed to fetch video information',
-      { originalError: error instanceof Error ? error.message : 'Unknown error' },
-      500
-    );
-  }
-}
+// fetchVideoInfo function removed to eliminate unused code warnings
+// (was fetching video information from YouTube Data API v3)
 
 /**
  * Fetch transcript using Python script
@@ -371,18 +296,18 @@ async function fetchTranscript(
     console.log(`Attempting to fetch transcript for video ID: ${videoId}`);
     
     // Use the same approach as the chapter generation endpoint
-    const { execFile } = require('child_process');
-    const { promisify } = require('util');
-    const path = require('path');
     const execFileAsync = promisify(execFile);
     
     const pythonScript = path.join(process.cwd(), 'api_caps.py');
-    const venvPython = path.join(process.cwd(), 'venv', 'bin', 'python3');
+    // Use system Python in production (Railway), venv Python in development
+    const pythonPath = process.env.NODE_ENV === 'production' 
+      ? 'python3' 
+      : path.join(process.cwd(), 'venv', 'bin', 'python3');
     
-    console.log(`Executing Python script: ${venvPython} ${pythonScript} ${videoId}`);
+    console.log(`Executing Python script: ${pythonPath} ${pythonScript} ${videoId}`);
     
-    const { stdout, stderr } = await execFileAsync(venvPython, [pythonScript, videoId], {
-      timeout: 30000, // 30 second timeout
+    const { stdout, stderr } = await execFileAsync(pythonPath, [pythonScript, videoId], {
+      pythonPath: 30000, // 30 second timeout
       maxBuffer: 10 * 1024 * 1024 // 10MB buffer for large transcripts
     });
 
@@ -399,7 +324,7 @@ async function fetchTranscript(
     }
     
     // Convert Python script output to expected format
-    const segments: YouTubeTranscriptSegment[] = transcriptData.transcript.map((segment: any) => ({
+    const segments: YouTubeTranscriptSegment[] = transcriptData.transcript.map((segment: { text: string; start: number; duration?: number }) => ({
       text: segment.text,
       start: segment.start,
       duration: segment.duration || 1
@@ -546,19 +471,8 @@ async function checkYouTubeQuota(): Promise<{ available: boolean; resetTime?: nu
   return { available: true }; // Mock implementation
 }
 
-/**
- * Parse ISO 8601 duration to seconds
- */
-function parseDurationToSeconds(duration: string): number {
-  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-  if (!match) return 0;
-  
-  const hours = parseInt(match[1] || '0');
-  const minutes = parseInt(match[2] || '0');
-  const seconds = parseInt(match[3] || '0');
-  
-  return hours * 3600 + minutes * 60 + seconds;
-}
+// parseDurationToSeconds function removed to eliminate unused code warnings
+// (was parsing ISO 8601 duration to seconds)
 
 /**
  * Generate unique request ID
@@ -573,7 +487,7 @@ function generateRequestId(): string {
 function getClientIdentifier(request: NextRequest): string {
   // Try to get user ID from session/auth
   // Fallback to IP address
-  return request.ip || request.headers.get('x-forwarded-for') || 'anonymous';
+  return request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'anonymous';
 }
 
 /**
