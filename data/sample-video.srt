@@ -1,0 +1,540 @@
+1
+00:00:00,066 --> 00:00:00,466
+hey
+
+2
+00:00:00,466 --> 00:00:05,500
+I'm Kedesha and here's what I'm thinking about Model Context Protocol
+
+3
+00:00:05,500 --> 00:00:06,966
+MCP MCP
+
+4
+00:00:06,966 --> 00:00:10,900
+the MCP has been everywhere and it's not going anywhere
+
+5
+00:00:10,900 --> 00:00:14,366
+instead it's going to be more integrated into our environments
+
+6
+00:00:14,366 --> 00:00:16,166
+our daily lives as developers
+
+7
+00:00:16,166 --> 00:00:18,333
+as humans using AI right
+
+8
+00:00:18,333 --> 00:00:22,733
+so what is MCP and what's the purpose of it
+
+9
+00:00:22,733 --> 00:00:26,033
+so MCP stands for Model Context Protocol
+
+10
+00:00:26,166 --> 00:00:30,133
+and it is an open protocol that standardizes how LLM applications
+
+11
+00:00:30,500 --> 00:00:32,766
+talk to your external data sources
+
+12
+00:00:32,766 --> 00:00:34,766
+so let's say you're in Claude
+
+13
+00:00:34,766 --> 00:00:37,933
+and let's say you want Claude to be able to help you
+
+14
+00:00:37,933 --> 00:00:40,166
+to automate your email
+
+15
+00:00:40,266 --> 00:00:41,833
+now just by itself
+
+16
+00:00:41,833 --> 00:00:43,300
+if I say hey Claude
+
+17
+00:00:43,400 --> 00:00:44,266
+hey Claude
+
+18
+00:00:44,600 --> 00:00:48,366
+if I say what's on my schedule today
+
+19
+00:00:48,366 --> 00:00:53,566
+Claude won't know because it doesn't have context or information
+
+20
+00:00:53,600 --> 00:00:55,666
+about what's on my schedule
+
+21
+00:00:55,666 --> 00:00:59,100
+I don't have access to your calendar or schedule information
+
+22
+00:00:59,100 --> 00:01:01,900
+so I can't see what you have going on today
+
+23
+00:01:02,100 --> 00:01:08,300
+but because of MCP I can connect my calendar to Claud
+
+24
+00:01:08,300 --> 00:01:09,800
+now I'm not going to be doing this
+
+25
+00:01:09,800 --> 00:01:11,900
+because I don't have a demo calendar here
+
+26
+00:01:11,900 --> 00:01:13,566
+but think about the possibilities if
+
+27
+00:01:13,566 --> 00:01:15,533
+my calendar is connected to Claude
+
+28
+00:01:15,566 --> 00:01:16,766
+I can come in here and say
+
+29
+00:01:16,766 --> 00:01:19,566
+hey Claude what's on my schedule today right
+
+30
+00:01:19,566 --> 00:01:21,533
+you get a list of what's on your schedule today
+
+31
+00:01:21,533 --> 00:01:22,433
+you can say hey Claude
+
+32
+00:01:22,433 --> 00:01:25,333
+can you add so and so to my schedule
+
+33
+00:01:25,333 --> 00:01:27,100
+can you add X meeting to my schedule
+
+34
+00:01:27,100 --> 00:01:29,033
+think about the possibilities right
+
+35
+00:01:29,033 --> 00:01:31,366
+so what's the purpose of MCP
+
+36
+00:01:31,366 --> 00:01:32,800
+the purpose of MCP
+
+37
+00:01:32,800 --> 00:01:36,133
+is to provide additional context to your LLM applications
+
+38
+00:01:36,133 --> 00:01:37,700
+and your LLM in general
+
+39
+00:01:37,733 --> 00:01:42,733
+because models are only as good as the context they have
+
+40
+00:01:42,733 --> 00:01:45,100
+or the context that you provide them with
+
+41
+00:01:45,100 --> 00:01:49,033
+if LMS don't have the ability to connect to other apps and tools
+
+42
+00:01:49,033 --> 00:01:51,700
+it's not as useful as it can possibly be
+
+43
+00:01:51,700 --> 00:01:53,600
+and I have my notes here uh
+
+44
+00:01:53,600 --> 00:01:55,733
+because I've been working on a blog post that's gonna come
+
+45
+00:01:55,733 --> 00:01:58,333
+out next week with the same information right
+
+46
+00:01:58,433 --> 00:01:59,733
+so with MP servers
+
+47
+00:01:59,733 --> 00:02:04,566
+is essentially what LLMs have to connect to the outside world
+
+48
+00:02:04,566 --> 00:02:04,966
+so you know
+
+49
+00:02:04,966 --> 00:02:09,233
+how you can install a plugin or a Chrome extension on your browser
+
+50
+00:02:09,233 --> 00:02:11,100
+to be able to connect with other things
+
+51
+00:02:11,100 --> 00:02:13,233
+and do additional things on your browser
+
+52
+00:02:13,366 --> 00:02:17,833
+that's the same thing but for Llms so we have Chrome extensions
+
+53
+00:02:18,033 --> 00:02:20,900
+large language models have MCP servers
+
+54
+00:02:21,333 --> 00:02:22,300
+did that make sense
+
+55
+00:02:22,300 --> 00:02:26,333
+I hope it did so a little bit about the architecture of MCP servers
+
+56
+00:02:26,333 --> 00:02:31,233
+right so the MCP is based on a client server architecture
+
+57
+00:02:31,233 --> 00:02:34,166
+and this should sound very similar to you if you're a developer
+
+58
+00:02:34,166 --> 00:02:38,833
+because that's rest and that's also the Language Server Protocol
+
+59
+00:02:38,833 --> 00:02:42,033
+LSP which was established back in 2016 by Microsoft
+
+60
+00:02:42,033 --> 00:02:46,300
+that details how IDEs interacted with programming languages right
+
+61
+00:02:46,300 --> 00:02:49,500
+it standardized how IDEs interacted with programming languages
+
+62
+00:02:49,700 --> 00:02:53,600
+basically and so there are three core tenants of MCP
+
+63
+00:02:53,600 --> 00:02:56,366
+there's the host there's the server and there's the client
+
+64
+00:02:56,366 --> 00:02:57,966
+so I'm gonna read my notebook
+
+65
+00:02:57,966 --> 00:03:03,900
+so MCP Host is a LLM app that wants to access data through MCP
+
+66
+00:03:03,900 --> 00:03:06,666
+so for example think of Claude here
+
+67
+00:03:06,666 --> 00:03:09,600
+this is an MCP host and also VS code
+
+68
+00:03:09,600 --> 00:03:12,733
+that's right behind Claude on my desktop right now
+
+69
+00:03:12,733 --> 00:03:15,100
+is also an MCP host right
+
+70
+00:03:15,100 --> 00:03:18,433
+an MCP server is a lightweight program
+
+71
+00:03:18,433 --> 00:03:22,966
+that each expose specific capabilities through MCP
+
+72
+00:03:23,166 --> 00:03:26,600
+so an MCP server could be the Github MCP server
+
+73
+00:03:26,600 --> 00:03:28,600
+could be the Figma MCP server
+
+74
+00:03:28,600 --> 00:03:31,133
+it could be the Canva MCP server
+
+75
+00:03:31,133 --> 00:03:32,266
+right and cloud
+
+76
+00:03:32,266 --> 00:03:33,333
+they're called connectors
+
+77
+00:03:33,333 --> 00:03:35,933
+but these are all CP servers right
+
+78
+00:03:35,933 --> 00:03:37,433
+so you have Gmail Canva
+
+79
+00:03:37,433 --> 00:03:39,766
+Asana Atlassian
+
+80
+00:03:40,233 --> 00:03:43,533
+you have in video to turn your ideas into video
+
+81
+00:03:43,533 --> 00:03:45,433
+you have Versal CP Server
+
+82
+00:03:45,433 --> 00:03:47,600
+there are so many MCP server
+
+83
+00:03:47,633 --> 00:03:48,533
+now if you're a developer
+
+84
+00:03:48,533 --> 00:03:52,766
+and you want to explore developer specific MCP server
+
+85
+00:03:52,800 --> 00:03:55,133
+you can do that in VS code
+
+86
+00:03:55,133 --> 00:03:57,900
+so if I go here and go to my extensions
+
+87
+00:03:58,400 --> 00:04:00,700
+and sir if you put at MCP
+
+88
+00:04:00,800 --> 00:04:03,800
+if you click on this browse MCP server
+
+89
+00:04:03,833 --> 00:04:05,200
+just pop this here
+
+90
+00:04:05,200 --> 00:04:10,166
+you will see a list of MCP servers that you can install in VS code
+
+91
+00:04:10,200 --> 00:04:13,533
+and the great thing about this is it's just one click install
+
+92
+00:04:13,533 --> 00:04:16,366
+so if I click install context 7
+
+93
+00:04:16,433 --> 00:04:19,900
+and Context 7 is a way for large language models to get up to date
+
+94
+00:04:19,900 --> 00:04:22,833
+information about up to date version
+
+95
+00:04:22,833 --> 00:04:24,066
+specific documentation
+
+96
+00:04:24,066 --> 00:04:27,200
+and code examples from any library or framework
+
+97
+00:04:27,200 --> 00:04:34,633
+great so open VS code and now context 7 is installed in VS code
+
+98
+00:04:34,800 --> 00:04:35,800
+just like that right
+
+99
+00:04:35,800 --> 00:04:39,200
+so one click install so how can I interact with contact 7
+
+100
+00:04:39,200 --> 00:04:44,633
+well if I open up copilot here and I click on this tools button
+
+101
+00:04:45,000 --> 00:04:48,433
+you're going to see all the tools that you have available
+
+102
+00:04:48,433 --> 00:04:49,733
+so there are built in tools
+
+103
+00:04:49,733 --> 00:04:52,266
+but right here you can see there's MC
+
+104
+00:04:52,266 --> 00:04:54,600
+there's a Github MCP server that I have connected
+
+105
+00:04:54,733 --> 00:04:59,466
+and there's the Context 7 MCP server that I have connected right
+
+106
+00:04:59,466 --> 00:04:59,833
+and so
+
+107
+00:04:59,833 --> 00:05:06,100
+that's pretty much how simple it is to connect MCP server in VS code
+
+108
+00:05:06,100 --> 00:05:07,866
+as a developer and of course
+
+109
+00:05:07,866 --> 00:05:11,866
+you can use these MCP servers in other applications as well
+
+110
+00:05:11,866 --> 00:05:13,333
+not just VS code right
+
+111
+00:05:13,400 --> 00:05:15,500
+that's the magic of MCP servers
+
+112
+00:05:15,500 --> 00:05:16,600
+it gives your LMS
+
+113
+00:05:16,600 --> 00:05:19,733
+additional context and access to your external data sources
+
+114
+00:05:19,733 --> 00:05:22,533
+that's all I want you to think about when you think about MCP servers
+
+115
+00:05:22,533 --> 00:05:23,466
+right and so
+
+116
+00:05:23,466 --> 00:05:24,966
+MCP client
+
+117
+00:05:25,033 --> 00:05:29,133
+is what maintains that 1 to 1 connection with host applications
+
+118
+00:05:29,433 --> 00:05:35,133
+so Claude here serves as both an MCP host and an MCP client
+
+119
+00:05:35,133 --> 00:05:38,666
+from my understanding and so does VS code
+
+120
+00:05:38,666 --> 00:05:43,633
+VS code serve as an MCP host and an MCP client
+
+121
+00:05:43,666 --> 00:05:45,466
+as an MCP host VS
+
+122
+00:05:45,466 --> 00:05:48,500
+code provides the environment and the runtime for MCP clients
+
+123
+00:05:48,500 --> 00:05:50,133
+to connect to MCP servers
+
+124
+00:05:50,200 --> 00:05:54,933
+and as an MCP client when VS code connects to MCP servers
+
+125
+00:05:55,000 --> 00:05:59,500
+it instantiates an MCP client object to manage that connection alright
+
+126
+00:05:59,600 --> 00:06:01,433
+so that's what I'm thinking about today
+
+127
+00:06:01,433 --> 00:06:05,600
+I'm thinking about MCP let me know what questions you have about MCP's
+
+128
+00:06:05,633 --> 00:06:08,166
+let me know what MCP's you're playing around with
+
+129
+00:06:08,166 --> 00:06:13,000
+I'm very keen to play with the NHN MCP and also the Appify MCP
+
+130
+00:06:13,000 --> 00:06:15,066
+cause I'm looking into some automation stuff
+
+131
+00:06:15,400 --> 00:06:17,533
+but let me know what questions you have
+
+132
+00:06:17,533 --> 00:06:21,000
+have you tried MCP what MCP are you using
+
+133
+00:06:21,000 --> 00:06:24,833
+do you know what MCP is are you excited about this as I am
+
+134
+00:06:25,033 --> 00:06:28,566
+until next time when I tell you what I'm thinking about
+
+135
+00:06:28,566 --> 00:06:30,533
+I'm Kedesha bye
+
