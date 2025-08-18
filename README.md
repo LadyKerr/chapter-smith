@@ -44,7 +44,7 @@ npm install
 # Set up Python environment for transcript fetching
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install youtube-transcript-api
+pip install -r requirements.txt
 ```
 
 ### 2. Environment Setup
