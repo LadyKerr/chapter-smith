@@ -66,12 +66,6 @@ export default function URLInput({
     }
   };
 
-  const handlePasteEvent = (e: React.ClipboardEvent) => {
-    const pastedURL = extractURLFromPaste(e);
-    if (pastedURL) {
-      setUrl(pastedURL);
-    }
-  };
 
   return (
     <div className="w-full max-w-4xl mx-auto px-6 py-12">
@@ -109,7 +103,6 @@ export default function URLInput({
                 onChange={(e) => setUrl(e.target.value)}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
-                onPaste={handlePasteEvent}
                 placeholder={placeholder}
                 className={`
                   w-full px-4 py-4 pr-20 text-base border rounded-lg 

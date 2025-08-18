@@ -216,79 +216,189 @@ export const EXPORT_FORMATS: ExportFormat[] = [
   }
 ];
 
-// API stub functions (to be implemented with real backend)
+// Production API functions integrated with backend endpoints
 export const api = {
   validateURL: async (url: string): Promise<{ valid: boolean; videoInfo?: any; error?: string }> => {
-    // Stub implementation
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (!validateYouTubeURL(url)) {
-      return { valid: false, error: 'Invalid YouTube URL' };
-    }
-
-    // Mock successful response
-    return {
-      valid: true,
-      videoInfo: {
-        id: extractVideoId(url),
-        title: 'Sample Video Title',
-        duration: '1:23:45',
-        url,
-        thumbnailUrl: `https://img.youtube.com/vi/${extractVideoId(url)}/maxresdefault.jpg`
+    try {
+      if (!validateYouTubeURL(url)) {
+        return { valid: false, error: 'Invalid YouTube URL format' };
       }
-    };
+
+      const response = await fetch('/api/youtube/transcript', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url })
+      });
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        return { 
+          valid: false, 
+          error: result.error?.message || 'Failed to validate URL'
+        };
+      }
+
+      // Transform API response to expected format
+      return {
+        valid: true,
+        videoInfo: {
+          id: result.data.videoId,
+          title: result.data.title,
+          duration: formatTime(result.data.duration),
+          url,
+          thumbnailUrl: `https://img.youtube.com/vi/${result.data.videoId}/maxresdefault.jpg`
+        }
+      };
+    } catch (error) {
+      console.error('URL validation error:', error);
+      return { 
+        valid: false, 
+        error: 'Network error. Please check your connection and try again.' 
+      };
+    }
   },
 
   generateChapters: async (url: string): Promise<{ chapters: Chapter[]; error?: string }> => {
-    // Stub implementation with mock chapters
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    return {
-      chapters: [
-        {
-          id: '1',
-          timestamp: '00:00',
-          title: 'Introduction and Setup',
-          description: 'Getting started with the project structure and initial configuration',
-          startTime: 0
+    try {
+      const response = await fetch('/api/chapters/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          id: '2',
-          timestamp: '03:42',
-          title: 'Installing Dependencies',
-          description: 'Setting up the required packages and development environment',
-          startTime: 222
-        },
-        {
-          id: '3',
-          timestamp: '08:15',
-          title: 'Building the UI',
-          description: 'Creating the user interface components',
-          startTime: 495
-        }
-      ]
-    };
+        body: JSON.stringify({ url })
+      });
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        return { 
+          chapters: [], 
+          error: result.error?.message || 'Failed to generate chapters'
+        };
+      }
+
+      // Transform API response to expected format
+      const chapters: Chapter[] = result.data.chapters.map((chapter: any) => ({
+        id: chapter.id,
+        timestamp: chapter.timestamp,
+        title: chapter.title,
+        description: chapter.description,
+        startTime: chapter.startTime
+      }));
+
+      return { chapters };
+    } catch (error) {
+      console.error('Chapter generation error:', error);
+      return { 
+        chapters: [], 
+        error: 'Failed to generate chapters. Please try again.' 
+      };
+    }
   },
 
   uploadSRT: async (file: File): Promise<{ chapters: Chapter[]; error?: string }> => {
-    // Stub implementation
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const isValid = await validateSRTFile(file);
-    if (!isValid) {
-      return { chapters: [], error: 'Invalid SRT file format' };
-    }
+    try {
+      const isValid = await validateSRTFile(file);
+      if (!isValid) {
+        return { chapters: [], error: 'Invalid SRT file format' };
+      }
 
-    return {
-      chapters: [
-        {
-          id: '1',
-          timestamp: '00:00',
-          title: 'Chapter from SRT',
-          description: 'Generated from uploaded SRT file',
-          startTime: 0
-        }
-      ]
-    };
+      // For SRT files, we'll parse them locally and then generate chapters
+      const text = await file.text();
+      const parsedChapters = await parseSRTToChapters(text);
+      
+      if (parsedChapters.length === 0) {
+        return { chapters: [], error: 'No valid chapters found in SRT file' };
+      }
+
+      return { chapters: parsedChapters };
+    } catch (error) {
+      console.error('SRT upload error:', error);
+      return { 
+        chapters: [], 
+        error: 'Failed to process SRT file. Please check the format and try again.' 
+      };
+    }
+  },
+
+  exportChapters: async (chapters: Chapter[], format: string, videoInfo?: any): Promise<{ content: string; filename: string; mimeType: string; error?: string }> => {
+    try {
+      const response = await fetch('/api/chapters/export', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          chapters, 
+          format,
+          videoInfo,
+          options: {
+            includeTimestamps: true,
+            includeDescriptions: true,
+            includeVideoInfo: !!videoInfo
+          }
+        })
+      });
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        return { 
+          content: '', 
+          filename: '', 
+          mimeType: '',
+          error: result.error?.message || 'Failed to export chapters'
+        };
+      }
+
+      return {
+        content: result.data.content,
+        filename: result.data.filename,
+        mimeType: result.data.mimeType
+      };
+    } catch (error) {
+      console.error('Export error:', error);
+      return { 
+        content: '', 
+        filename: '', 
+        mimeType: '',
+        error: 'Failed to export chapters. Please try again.' 
+      };
+    }
   }
 };
+
+// Helper function to parse SRT files into chapters
+async function parseSRTToChapters(srtContent: string): Promise<Chapter[]> {
+  const chapters: Chapter[] = [];
+  const entries = srtContent.trim().split('\n\n');
+  
+  entries.forEach((entry, index) => {
+    const lines = entry.trim().split('\n');
+    if (lines.length >= 3) {
+      const timeLine = lines[1];
+      const titleLine = lines[2];
+      const descriptionLines = lines.slice(3);
+      
+      // Parse timestamp (format: HH:MM:SS,mmm --> HH:MM:SS,mmm)
+      const timeMatch = timeLine.match(/(\d{2}:\d{2}:\d{2}),\d{3}\s*-->/);
+      if (timeMatch) {
+        const timestamp = timeMatch[1];
+        const startTime = parseTimeToSeconds(timestamp);
+        
+        chapters.push({
+          id: `srt_${index + 1}`,
+          timestamp,
+          title: titleLine.trim(),
+          description: descriptionLines.join(' ').trim() || undefined,
+          startTime
+        });
+      }
+    }
+  });
+  
+  return chapters;
+}
