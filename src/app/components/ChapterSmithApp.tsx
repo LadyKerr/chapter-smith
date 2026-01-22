@@ -11,6 +11,7 @@ import SRTUpload from './SRTUpload';
 import ChaptersList from './ChaptersList';
 import ExportButton from './ExportButton';
 import ErrorDisplay from './ErrorDisplay';
+import ThemeToggle from './ThemeToggle';
 
 type AppState = 'input' | 'processing' | 'upload' | 'chapters' | 'error';
 
@@ -188,30 +189,33 @@ export default function ChapterSmithApp() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       <div className="container mx-auto">
         {/* Header */}
         <header className="py-6">
           <div className="max-w-4xl mx-auto px-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-500 dark:bg-blue-600 rounded-lg flex items-center justify-center">
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <h1 className="text-xl font-bold text-gray-900">Chapter Smith</h1>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Chapter Smith</h1>
               </div>
               
-              {appState !== 'input' && (
-                <button
-                  type="button"
-                  onClick={handleTryDifferentVideo}
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
-                >
-                  ← Start Over
-                </button>
-              )}
+              <div className="flex items-center space-x-4">
+                <ThemeToggle />
+                {appState !== 'input' && (
+                  <button
+                    type="button"
+                    onClick={handleTryDifferentVideo}
+                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200"
+                  >
+                    ← Start Over
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </header>
@@ -267,21 +271,21 @@ export default function ChapterSmithApp() {
         {/* Footer */}
         <footer className="py-12">
           <div className="max-w-4xl mx-auto px-6">
-            <div className="border-t border-gray-200 pt-8">
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
               <div className="flex flex-col md:flex-row justify-between items-center">
                 <div className="flex items-center space-x-2 mb-4 md:mb-0">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Made with ❤️ for content creators
                   </p>
                 </div>
-                <div className="flex items-center space-x-6 text-sm text-gray-500">
-                  <a href="#" className="hover:text-gray-900 transition-colors duration-200">
+                <div className="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
+                  <a href="#" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200">
                     Privacy
                   </a>
-                  <a href="#" className="hover:text-gray-900 transition-colors duration-200">
+                  <a href="#" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200">
                     Terms
                   </a>
-                  <a href="#" className="hover:text-gray-900 transition-colors duration-200">
+                  <a href="#" className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-200">
                     Support
                   </a>
                 </div>

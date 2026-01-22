@@ -71,24 +71,24 @@ export default function URLInput({
     <div className="w-full max-w-4xl mx-auto px-6 py-12">
       {/* Animated Header */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 animate-fade-in">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4 animate-fade-in">
           Turn YouTube Videos into Chapters
         </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto animate-fade-in-up delay-300">
+        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto animate-fade-in-up delay-300">
           Generate timestamped chapters automatically from any YouTube video. 
           Perfect for creators, educators, and content organizers.
         </p>
       </div>
 
       {/* Input Form */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* URL Input Field */}
           <div className="relative group">
             <label 
               htmlFor="youtube-url" 
               className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
-                isFocused ? 'text-blue-600' : 'text-gray-700'
+                isFocused ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
               }`}
             >
               YouTube URL
@@ -106,16 +106,18 @@ export default function URLInput({
                 placeholder={placeholder}
                 className={`
                   w-full px-4 py-4 pr-20 text-base border rounded-lg 
+                  bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
                   transition-all duration-300 ease-out
-                  hover:border-gray-400 hover:shadow-sm
+                  hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-sm
                   focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
                   placeholder:transition-opacity placeholder:duration-200
                   focus:placeholder:opacity-50
+                  placeholder:text-gray-400 dark:placeholder:text-gray-500
                   ${isValid === false || error ? 
                     'border-red-500 ring-1 ring-red-500 animate-shake' : 
                     isValid === true ? 
                     'border-green-500 ring-1 ring-green-500' : 
-                    'border-gray-300'
+                    'border-gray-300 dark:border-gray-600'
                   }
                 `}
                 aria-describedby="url-help url-error"
@@ -127,10 +129,10 @@ export default function URLInput({
               <button
                 type="button"
                 onClick={handlePaste}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 
-                         hover:text-gray-600 focus:text-blue-500 transition-all duration-200
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 dark:text-gray-500
+                         hover:text-gray-600 dark:hover:text-gray-300 focus:text-blue-500 transition-all duration-200
                          hover:scale-110 active:scale-95 transform
-                         hover:bg-gray-100 rounded-md disabled:opacity-50"
+                         hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md disabled:opacity-50"
                 aria-label="Paste from clipboard"
                 disabled={isLoading}
               >
@@ -163,7 +165,7 @@ export default function URLInput({
 
             {/* Help Text */}
             <p id="url-help" className={`mt-2 text-sm transition-all duration-200 ${
-              isFocused ? 'text-blue-600' : 'text-gray-500'
+              isFocused ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
             }`}>
               Supports youtube.com and youtu.be links. Example: https://youtube.com/watch?v=dQw4w9WgXcQ
             </p>
@@ -219,18 +221,18 @@ export default function URLInput({
         </form>
 
         {/* Features List */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400">
           <div className="flex items-center animate-fade-in-up delay-700 
-                        hover:text-green-600 transition-colors duration-200">
-            <svg className="w-4 h-4 text-green-500 mr-2 animate-bounce-subtle" 
+                        hover:text-green-600 dark:hover:text-green-400 transition-colors duration-200">
+            <svg className="w-4 h-4 text-green-500 dark:text-green-400 mr-2 animate-bounce-subtle" 
                  fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
             Supports public videos up to 3 hours
           </div>
           <div className="flex items-center animate-fade-in-up delay-900
-                        hover:text-green-600 transition-colors duration-200">
-            <svg className="w-4 h-4 text-green-500 mr-2 animate-bounce-subtle delay-100" 
+                        hover:text-green-600 dark:hover:text-green-400 transition-colors duration-200">
+            <svg className="w-4 h-4 text-green-500 dark:text-green-400 mr-2 animate-bounce-subtle delay-100" 
                  fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>

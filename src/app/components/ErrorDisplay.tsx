@@ -149,11 +149,11 @@ export default function ErrorDisplay({
 
     switch (variant) {
       case 'primary':
-        return `${base} text-white bg-blue-500 hover:bg-blue-600 focus:ring-blue-500`;
+        return `${base} text-white bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 focus:ring-blue-500`;
       case 'secondary':
-        return `${base} text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-gray-500`;
+        return `${base} text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:ring-gray-500`;
       case 'outline':
-        return `${base} text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:ring-blue-500`;
+        return `${base} text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-blue-500`;
       default:
         return base;
     }
@@ -161,27 +161,27 @@ export default function ErrorDisplay({
 
   return (
     <div className="w-full max-w-2xl mx-auto px-6 py-8">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 text-center animate-fade-in">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8 text-center animate-fade-in">
         {/* Error Icon */}
-        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-gentle">
+        <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-gentle">
           {getErrorIcon()}
         </div>
 
         {/* Error Message */}
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4 animate-fade-in-up">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4 animate-fade-in-up">
           {getErrorTitle()}
         </h2>
-        <p className="text-base text-gray-600 mb-6 max-w-md mx-auto animate-fade-in-up delay-200">
+        <p className="text-base text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto animate-fade-in-up delay-200">
           {errorMessage}
         </p>
 
         {/* Possible Causes */}
-        <div className="text-left bg-gray-50 rounded-lg p-6 mb-8 max-w-md mx-auto animate-fade-in-up delay-400">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">This might be because:</h3>
-          <ul className="space-y-2 text-sm text-gray-600">
+        <div className="text-left bg-gray-50 dark:bg-gray-900/50 rounded-lg p-6 mb-8 max-w-md mx-auto animate-fade-in-up delay-400">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">This might be because:</h3>
+          <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
             {getPossibleCauses().map((cause, index) => (
               <li key={index} className="flex items-start animate-fade-in-left" style={{ animationDelay: `${0.6 + index * 0.1}s` }}>
-                <span className="block w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                <span className="block w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
                 {cause}
               </li>
             ))}
@@ -206,13 +206,13 @@ export default function ErrorDisplay({
         )}
 
         {/* Support Link */}
-        <div className="mt-8 pt-6 border-t border-gray-200 animate-fade-in-up delay-1000">
-          <p className="text-sm text-gray-500 mb-2">
+        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 animate-fade-in-up delay-1000">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
             Still having trouble?
           </p>
           <button
             type="button"
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium underline transition-colors duration-200"
+            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium underline transition-colors duration-200"
           >
             Contact Support
           </button>

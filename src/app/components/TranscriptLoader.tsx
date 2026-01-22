@@ -41,14 +41,14 @@ export default function TranscriptLoader({
 
   return (
     <div className="w-full max-w-2xl mx-auto px-6 py-8">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8 
                     transform transition-all duration-300 animate-fade-in">
         {/* Animated Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 mx-auto mb-4 relative">
             {/* Animated Processing Icon */}
-            <div className="absolute inset-0 bg-blue-100 rounded-full animate-ping"></div>
-            <div className="relative w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center 
+            <div className="absolute inset-0 bg-blue-100 dark:bg-blue-900/30 rounded-full animate-ping"></div>
+            <div className="relative w-16 h-16 bg-blue-500 dark:bg-blue-600 rounded-full flex items-center justify-center 
                           animate-pulse">
               <svg className="w-8 h-8 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
@@ -57,18 +57,18 @@ export default function TranscriptLoader({
             </div>
           </div>
           
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2 animate-pulse-text">
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2 animate-pulse-text">
             Processing Video
           </h2>
-          <p className="text-base text-gray-600 animate-fade-in delay-300">
+          <p className="text-base text-gray-600 dark:text-gray-400 animate-fade-in delay-300">
             <span className="animate-typing">Analyzing your video and generating chapters</span>
             <span className="animate-dots">...</span>
           </p>
           
           {videoInfo && (
-            <div className="mt-4 p-3 bg-gray-50 rounded-lg animate-fade-in delay-500">
-              <p className="text-sm text-gray-700 font-medium">{videoInfo.title}</p>
-              <p className="text-xs text-gray-500">Duration: {videoInfo.duration}</p>
+            <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg animate-fade-in delay-500">
+              <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">{videoInfo.title}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Duration: {videoInfo.duration}</p>
             </div>
           )}
         </div>
@@ -76,13 +76,13 @@ export default function TranscriptLoader({
         {/* Enhanced Progress Bar */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700">Progress</span>
-            <span className="text-sm font-medium text-blue-600 animate-count-up">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
+            <span className="text-sm font-medium text-blue-600 dark:text-blue-400 animate-count-up">
               {Math.round(animatedProgress)}%
             </span>
           </div>
           <div 
-            className="w-full bg-gray-200 rounded-full h-3 overflow-hidden relative"
+            className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden relative"
             role="progressbar"
             aria-valuenow={animatedProgress}
             aria-valuemin={0}
@@ -90,7 +90,7 @@ export default function TranscriptLoader({
             aria-label="Chapter generation progress"
           >
             {/* Background Shimmer Effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent 
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white dark:via-gray-600 to-transparent 
                           opacity-30 animate-shimmer"></div>
             
             {/* Animated Progress Fill */}
@@ -131,7 +131,7 @@ export default function TranscriptLoader({
               )}
             </div>
             <span className={`ml-3 text-sm ${
-              getStepStatus('validating') === 'current' ? 'font-medium text-gray-900' : 'text-gray-700'
+              getStepStatus('validating') === 'current' ? 'font-medium text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'
             } animate-fade-in delay-400`}>
               Video found and accessible
             </span>
@@ -159,7 +159,7 @@ export default function TranscriptLoader({
               )}
             </div>
             <span className={`ml-3 text-sm ${
-              getStepStatus('extracting') === 'current' ? 'font-medium text-gray-900' : 'text-gray-700'
+              getStepStatus('extracting') === 'current' ? 'font-medium text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'
             } animate-fade-in delay-600`}>
               Extracting audio transcript
             </span>
@@ -187,7 +187,7 @@ export default function TranscriptLoader({
               )}
             </div>
             <span className={`ml-3 text-sm ${
-              getStepStatus('generating') === 'current' ? 'font-medium text-gray-900' : 'text-gray-700'
+              getStepStatus('generating') === 'current' ? 'font-medium text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'
             } animate-fade-in delay-800`}>
               {getStepStatus('generating') === 'current' ? (
                 <>
@@ -218,7 +218,7 @@ export default function TranscriptLoader({
               )}
             </div>
             <span className={`ml-3 text-sm ${
-              state.status === 'completed' ? 'font-medium text-gray-900' : 'text-gray-500'
+              state.status === 'completed' ? 'font-medium text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'
             } animate-fade-in delay-1000`}>
               Ready for review
             </span>
@@ -227,13 +227,13 @@ export default function TranscriptLoader({
 
         {/* Time Estimate */}
         <div className="text-center mb-6">
-          <p className="text-sm text-gray-600 animate-fade-in delay-1200">
+          <p className="text-sm text-gray-600 dark:text-gray-400 animate-fade-in delay-1200">
             Estimated time remaining: 
-            <span className="font-medium text-gray-900 animate-pulse-number ml-1">
+            <span className="font-medium text-gray-900 dark:text-gray-100 animate-pulse-number ml-1">
               {formatTime(state.estimatedTimeRemaining)}
             </span>
           </p>
-          <p className="text-xs text-gray-500 mt-1">Current: {state.currentStep}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Current: {state.currentStep}</p>
         </div>
 
         {/* Cancel Button */}
@@ -241,7 +241,7 @@ export default function TranscriptLoader({
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 
+            className="px-6 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600
                      rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 
                      focus:ring-gray-500 focus:ring-offset-2 transform hover:scale-105 active:scale-95
                      opacity-0 animate-fade-in delay-1400"
