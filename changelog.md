@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+- **Sample Video Button**: Added "Try with sample video" button to URLInput component for instant demos without needing to find a video. Button pre-fills a known YouTube URL and validates it automatically.
+  - Located below the "Generate Chapters" button
+  - Includes play icon for visual clarity
+  - Disabled during loading state
+
 ### Fixed
 - **YouTube Transcript Fallback**: Fixed issue where transcript fetching would fail with "No transcript available" error even in development mode. The fallback mechanism now properly returns mock data when YouTube's transcript APIs are unavailable, allowing development and testing without requiring videos with actual transcripts.
   - Added proper error handling for empty JSON responses from YouTube's timedtext API
