@@ -254,9 +254,17 @@ export const api = {
       };
     } catch (error) {
       console.error('URL validation error:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      // Provide more specific error if possible
+      if (errorMessage.includes('fetch')) {
+        return { 
+          valid: false, 
+          error: 'Network error. Please check your connection and try again.' 
+        };
+      }
       return { 
         valid: false, 
-        error: 'Network error. Please check your connection and try again.' 
+        error: errorMessage || 'Network error. Please check your connection and try again.' 
       };
     }
   },

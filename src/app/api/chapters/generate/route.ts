@@ -79,10 +79,12 @@ Requirements:
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
   const requestId = generateRequestId();
+  let videoId: string | undefined;
 
   try {
     // Parse and validate request body
     const body: ChapterGenerationRequest = await request.json();
+    videoId = body.videoId;
     const validation = validateChapterRequest(body);
     
     if (!validation.isValid) {
@@ -218,7 +220,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Log error metrics
     await logProcessingMetrics({
       requestId,
-      videoId: body?.videoId || 'unknown',
+      videoId: videoId || 'unknown',
       chapterGenerationTimeMs: Date.now() - startTime,
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -438,6 +440,51 @@ async function generateChaptersWithAI(
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.error('Anthropic API error:', { status: response.status, error: errorData });
+      
+      // In development, return mock chapters when AI service is unavailable
+      if (process.env.NODE_ENV === 'development') {
+        console.log('AI service unavailable, returning mock chapters for development');
+        const duration = Math.max(...transcript.map(s => s.start + s.duration));
+        return [
+          {
+            id: 'ch_1',
+            timestamp: '00:00',
+            title: 'Introduction',
+            description: 'Welcome and overview of the topic',
+            startTime: 0
+          },
+          {
+            id: 'ch_2',
+            timestamp: formatTime(Math.floor(duration * 0.2)),
+            title: 'Getting Started',
+            description: 'Setting up the development environment',
+            startTime: Math.floor(duration * 0.2)
+          },
+          {
+            id: 'ch_3',
+            timestamp: formatTime(Math.floor(duration * 0.4)),
+            title: 'Core Concepts',
+            description: 'Understanding the main ideas and implementation',
+            startTime: Math.floor(duration * 0.4)
+          },
+          {
+            id: 'ch_4',
+            timestamp: formatTime(Math.floor(duration * 0.6)),
+            title: 'Advanced Features',
+            description: 'Exploring advanced functionality',
+            startTime: Math.floor(duration * 0.6)
+          },
+          {
+            id: 'ch_5',
+            timestamp: formatTime(Math.floor(duration * 0.8)),
+            title: 'Conclusion',
+            description: 'Summary and next steps',
+            startTime: Math.floor(duration * 0.8)
+          }
+        ];
+      }
+      
       throw new AIServiceError(
         APIErrorCode.AI_SERVICE_UNAVAILABLE,
         `AI service error: ${response.status}`,
