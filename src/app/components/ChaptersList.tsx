@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ChaptersListProps } from '../types';
+import { ChaptersListProps, Chapter } from '../types';
 import { formatChaptersForExport } from '../utils';
 import CopyButton from './CopyButton';
 import ChapterSkeleton from './ChapterSkeleton';
@@ -37,7 +37,7 @@ export default function ChaptersList({
     }
   };
 
-  const handleCopyChapter = (chapter: any) => {
+  const handleCopyChapter = (chapter: Chapter) => {
     const chapterText = `${chapter.timestamp} ${chapter.title}`;
     onCopyChapter(chapter);
   };
@@ -50,7 +50,7 @@ export default function ChaptersList({
           <div className="animate-fade-in-up">
             <h2 className="text-2xl font-semibold text-gray-900 mb-2">Chapters Generated</h2>
             <p className="text-base text-gray-600">
-              Video: "{videoInfo.title}" • Duration: {videoInfo.duration}
+              Video: &quot;{videoInfo.title}&quot; • Duration: {videoInfo.duration}
             </p>
           </div>
           <div className="mt-4 sm:mt-0 flex items-center text-sm text-gray-500 animate-fade-in-up delay-200">

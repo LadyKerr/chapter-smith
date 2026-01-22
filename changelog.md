@@ -3,6 +3,13 @@
 ## [Unreleased]
 
 ### Added
+- **Skeleton Loaders for Chapter List**: Added animated skeleton loaders that display during the initial rendering of generated chapters, providing better visual feedback during the transition from processing to displaying results.
+  - Created new `ChapterSkeleton` component with pulse animations
+  - Shows placeholder elements for timestamps, titles, and descriptions
+  - Displays for 800ms during initial chapter list render
+  - Smooth fade-in animation for enhanced UX
+  - Maintains consistent styling with existing chapter list items
+
 - **Sample Video Button**: Added "Try with sample video" button to URLInput component for instant demos without needing to find a video. Button pre-fills a known YouTube URL and validates it automatically.
   - Located below the "Generate Chapters" button
   - Includes play icon for visual clarity
@@ -15,6 +22,12 @@
   - Improved logging for debugging transcript fetch failures
 
 ### Technical Details
+- Added `src/app/components/ChapterSkeleton.tsx`: Reusable skeleton loader component
+- Modified `src/app/components/ChaptersList.tsx`:
+  - Added loading state management with useEffect hook
+  - Integrated ChapterSkeleton component for initial render
+  - Fixed TypeScript type issues with Chapter interface
+  - Fixed ESLint issues with escaped quotes in JSX
 - Modified `src/app/api/youtube/transcript/route.ts`:
   - Line 419-421: Now calls `fetchTranscriptFallback` when library returns 0 segments
   - Lines 503-557: Added try-catch for JSON parsing and returns mock data on error
