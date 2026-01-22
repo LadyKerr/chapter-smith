@@ -83,7 +83,7 @@ export default function ChaptersList({
         {/* Chapter List */}
         <div className="space-y-3 mb-8" role="list" aria-label="Generated chapters">
           {isLoading ? (
-            <ChapterSkeleton count={Math.min(chapters.length, 5)} delay={0} />
+            <ChapterSkeleton count={5} delay={0} />
           ) : (
             chapters.map((chapter, index) => (
             <div 
