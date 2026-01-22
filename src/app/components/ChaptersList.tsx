@@ -34,16 +34,16 @@ export default function ChaptersList({
 
   return (
     <div className="w-full max-w-4xl mx-auto px-6 py-8">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 animate-fade-in">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8 animate-fade-in">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div className="animate-fade-in-up">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Chapters Generated</h2>
-            <p className="text-base text-gray-600">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Chapters Generated</h2>
+            <p className="text-base text-gray-600 dark:text-gray-400">
               Video: "{videoInfo.title}" • Duration: {videoInfo.duration}
             </p>
           </div>
-          <div className="mt-4 sm:mt-0 flex items-center text-sm text-gray-500 animate-fade-in-up delay-200">
+          <div className="mt-4 sm:mt-0 flex items-center text-sm text-gray-500 dark:text-gray-400 animate-fade-in-up delay-200">
             <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
@@ -53,16 +53,16 @@ export default function ChaptersList({
 
         {/* Success Message */}
         {showSuccessMessage && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg animate-slide-down">
+          <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg animate-slide-down">
             <div className="flex items-center">
-              <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 text-green-500 dark:text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
               <div>
-                <p className="text-sm font-medium text-green-800">
+                <p className="text-sm font-medium text-green-800 dark:text-green-300">
                   All chapters copied to clipboard!
                 </p>
-                <p className="text-xs text-green-700">
+                <p className="text-xs text-green-700 dark:text-green-400">
                   Ready to paste into YouTube description
                 </p>
               </div>
@@ -76,8 +76,8 @@ export default function ChaptersList({
             <div 
               key={chapter.id}
               className={`
-                group flex items-center justify-between p-4 border border-gray-200 rounded-lg 
-                hover:border-gray-300 hover:shadow-sm transition-all duration-200
+                group flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg 
+                hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm transition-all duration-200
                 animate-fade-in-left
               `}
               style={{ animationDelay: `${index * 0.1}s` }}
@@ -87,16 +87,16 @@ export default function ChaptersList({
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
                     <span className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium 
-                                   bg-blue-100 text-blue-800 font-mono">
+                                   bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 font-mono">
                       {chapter.timestamp}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-medium text-gray-900 leading-snug">
+                    <p className="text-base font-medium text-gray-900 dark:text-gray-100 leading-snug">
                       {chapter.title}
                     </p>
                     {chapter.description && (
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                         {chapter.description}
                       </p>
                     )}
@@ -132,7 +132,7 @@ export default function ChaptersList({
             type="button"
             onClick={() => onExport('text')}
             className="inline-flex items-center justify-center px-6 py-3 text-base font-medium 
-                     text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg 
+                     text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg 
                      focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
                      transition-all duration-200 transform hover:scale-105 active:scale-95"
           >
@@ -147,7 +147,7 @@ export default function ChaptersList({
             type="button"
             onClick={onRegenerate}
             className="inline-flex items-center justify-center px-6 py-3 text-base font-medium 
-                     text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg 
+                     text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg 
                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
                      transition-all duration-200 transform hover:scale-105 active:scale-95"
           >
@@ -173,7 +173,7 @@ export default function ChaptersList({
             type="button"
             onClick={() => onExport('text')}
             className="flex items-center justify-center px-4 py-3 text-sm font-medium 
-                     text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg 
+                     text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg 
                      transition-colors duration-200 touch-manipulation"
             style={{ minHeight: '44px' }}
           >
@@ -190,8 +190,8 @@ export default function ChaptersList({
           <button
             type="button"
             onClick={onRegenerate}
-            className="w-full px-4 py-3 text-sm font-medium text-gray-700 bg-white 
-                     border border-gray-300 hover:bg-gray-50 rounded-lg 
+            className="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800
+                     border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg 
                      transition-colors duration-200 touch-manipulation"
             style={{ minHeight: '44px' }}
           >

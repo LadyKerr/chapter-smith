@@ -69,9 +69,9 @@ export default function CopyButton({
     }
 
     const variants = {
-      primary: 'text-white bg-blue-500 hover:bg-blue-600 focus:ring-blue-500 hover:scale-105 hover:shadow-lg',
-      secondary: 'text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-gray-500 hover:scale-105 hover:shadow-md',
-      success: 'text-white bg-green-500 hover:bg-green-600 focus:ring-green-500 hover:scale-105 hover:shadow-lg'
+      primary: 'text-white bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 focus:ring-blue-500 hover:scale-105 hover:shadow-lg',
+      secondary: 'text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:ring-gray-500 hover:scale-105 hover:shadow-md',
+      success: 'text-white bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 focus:ring-green-500 hover:scale-105 hover:shadow-lg'
     };
 
     return variants[variant];
@@ -160,12 +160,12 @@ export default function CopyButton({
       {showFeedback && (
         <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-50 
                       animate-float-up pointer-events-none">
-          <div className="bg-gray-900 text-white px-3 py-1 rounded-md text-xs font-medium 
+          <div className="bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-100 px-3 py-1 rounded-md text-xs font-medium 
                         shadow-lg relative whitespace-nowrap">
             Copied to clipboard!
             {/* Tooltip Arrow */}
             <div className="absolute top-full left-1/2 transform -translate-x-1/2 
-                          border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900" />
+                          border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
           </div>
         </div>
       )}
