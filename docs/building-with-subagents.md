@@ -8,7 +8,7 @@ tags: ["ai", "coding", "tutorial", "agents", "projects"]
 ---
 
 # Claude Chapter Smith 🎬  
-*Turn any YouTube URL into timestamped chapters. Built with Claude subagents.*
+*Turn any YouTube URL into timestamped chapters.*
 
 I wanted to solve a simple but frustrating problem:  
 Generating Chapters for Youtube videos takes hours. I've had to do it multiple times, and it's always been a tedious process.

@@ -1,6 +1,8 @@
 # Chapter Smith
 
-Turn any YouTube URL into polished, timestamped chapters—built by autonomous Claude sub-agents
+Turn any YouTube URL into polished, timestamped chapters
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ![Next.js](https://img.shields.io/badge/Next.js-15.4.6-black?logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)
@@ -149,47 +151,9 @@ NODE_ENV=production
 1. **Next.js App Router:** Leverages React Server Components for optimal performance
 2. **TypeScript Throughout:** 100% type safety from frontend to API endpoints
 3. **Modular API Design:** Each endpoint handles one responsibility with comprehensive error handling
-4. **AI Agent Architecture:** Claude operates as an autonomous sub-agent with specialized prompting
+4. **AI Agent Architecture:** Copilot CLI operates as an autonomous sub-agent with specialized prompting
 5. **Graceful Degradation:** Multiple fallbacks for transcript fetching and error scenarios
 6. **Export Flexibility:** Supports 7+ export formats for maximum compatibility
-
-## 🎨 Why This Demonstration
-
-I chose this project to showcase several key AI development patterns:
-
-### 1. **AI Agent Autonomy**
-Claude operates independently to analyze content and make intelligent decisions about chapter boundaries, demonstrating how AI can handle complex, subjective tasks traditionally requiring human judgment.
-
-### 2. **Real-World API Integration** 
-Shows production-ready patterns for integrating multiple external services (YouTube, Anthropic) with proper error handling, rate limiting, and fallback strategies.
-
-### 3. **Practical AI Application**
-Solves a genuine pain point for content creators, proving AI's value in augmenting human workflows rather than replacing them.
-
-### 4. **Technical Excellence**
-Demonstrates modern development practices: TypeScript safety, comprehensive error handling, proper API design, and user experience considerations.
-
-## 🌟 Understanding Claude's Potential
-
-This demo illustrates several transformative aspects of Claude's capabilities:
-
-### Content Understanding
-- **Semantic Analysis:** Claude identifies topic transitions and thematic shifts in transcripts
-- **Context Awareness:** Maintains understanding of video structure and flow
-- **Quality Consistency:** Generates professional-quality output matching human editorial standards
-
-### Agentic Architecture
-Claude's ability to function as a multi-faceted agent allows for a more streamlined development process. By handling various roles—such as frontend developer, backend architect, and UX designer, Claude reduces the need for extensive human intervention, enabling faster iteration and deployment. This unlocks so much potential for productivity and speed for developers when building production-grade applications.
-
-## 🚀 What Makes Builders Want to Learn More
-
-Builders would want to learn more about how Claude was able to produce a production ready UI with a single prompt. Using subagents to do initial planning, and splitting the build into phases, this was achieved with minimal human intervention.
-
-Developers would be excited to start using subagents to build their projects and streamline their workflow with multi-agent collaboration. I know I am super excited about this - it was incredible to watch it come to life!
-
-## 🤖 How I Used Claude in Creating This Demo
-
-I wrote a blog post about this process while I was building. You can read it [here](/docs/building-with-subagents.md).
 
 ## Future Work
 
@@ -199,8 +163,6 @@ Given more time, I would implement the following features:
 - implement user authentication and authorization to personalize the experience and protect user data.
 - add a database to store user preferences and interaction history.
 - improve the ui to be more colorful and playful. Love the design, but it could use a bit more flair.
-
-The primary goal of this project was to demonstrate how subagents can be used with Claude to streamline the development process and enhance collaboration among AI agents.
 
 ## 🤝 Contributing
 
@@ -216,4 +178,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ by [LadyKerr](https://github.com/LadyKerr) • Powered by Claude**
+**Built with ❤️ by [LadyKerr](https://github.com/LadyKerr) • Powered by Copilot**
