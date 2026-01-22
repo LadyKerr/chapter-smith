@@ -9,11 +9,15 @@ export default function ThemeToggle() {
   // Load theme from localStorage on mount
   useEffect(() => {
     setMounted(true);
-    const isDark = localStorage.getItem('theme') === 'dark' ||
-      (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const savedTheme = localStorage.getItem('theme');
+    const isDark = savedTheme === 'dark' ||
+      (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
     setDarkMode(isDark);
+    
     if (isDark) {
       document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
   }, []);
 
