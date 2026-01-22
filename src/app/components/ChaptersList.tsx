@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChaptersListProps } from '../types';
 import { formatChaptersForExport } from '../utils';
 import CopyButton from './CopyButton';
+import ChapterSkeleton from './ChapterSkeleton';
 
 export default function ChaptersList({
   chapters,
@@ -14,6 +15,15 @@ export default function ChaptersList({
   onRegenerate
 }: ChaptersListProps) {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulate initial loading state to show skeleton
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800); // Show skeleton for 800ms for smooth transition
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleCopyAll = async () => {
     const allChaptersText = formatChaptersForExport(chapters, 'youtube');
@@ -72,7 +82,10 @@ export default function ChaptersList({
 
         {/* Chapter List */}
         <div className="space-y-3 mb-8" role="list" aria-label="Generated chapters">
-          {chapters.map((chapter, index) => (
+          {isLoading ? (
+            <ChapterSkeleton count={Math.min(chapters.length, 5)} delay={0} />
+          ) : (
+            chapters.map((chapter, index) => (
             <div 
               key={chapter.id}
               className={`
@@ -115,7 +128,8 @@ export default function ChaptersList({
                 </div>
               </div>
             </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Action Buttons */}
