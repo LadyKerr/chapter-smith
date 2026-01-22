@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ChaptersListProps } from '../types';
+import React, { useState, useEffect } from 'react';
+import { ChaptersListProps, Chapter } from '../types';
 import { formatChaptersForExport } from '../utils';
 import CopyButton from './CopyButton';
+import ChapterSkeleton from './ChapterSkeleton';
 
 export default function ChaptersList({
   chapters,
@@ -14,6 +15,15 @@ export default function ChaptersList({
   onRegenerate
 }: ChaptersListProps) {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulate initial loading state to show skeleton
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800); // Show skeleton for 800ms for smooth transition
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleCopyAll = async () => {
     const allChaptersText = formatChaptersForExport(chapters, 'youtube');
@@ -27,7 +37,7 @@ export default function ChaptersList({
     }
   };
 
-  const handleCopyChapter = (chapter: any) => {
+  const handleCopyChapter = (chapter: Chapter) => {
     const chapterText = `${chapter.timestamp} ${chapter.title}`;
     onCopyChapter(chapter);
   };
@@ -40,7 +50,7 @@ export default function ChaptersList({
           <div className="animate-fade-in-up">
             <h2 className="text-2xl font-semibold text-gray-900 mb-2">Chapters Generated</h2>
             <p className="text-base text-gray-600">
-              Video: "{videoInfo.title}" • Duration: {videoInfo.duration}
+              Video: &quot;{videoInfo.title}&quot; • Duration: {videoInfo.duration}
             </p>
           </div>
           <div className="mt-4 sm:mt-0 flex items-center text-sm text-gray-500 animate-fade-in-up delay-200">
@@ -72,7 +82,10 @@ export default function ChaptersList({
 
         {/* Chapter List */}
         <div className="space-y-3 mb-8" role="list" aria-label="Generated chapters">
-          {chapters.map((chapter, index) => (
+          {isLoading ? (
+            <ChapterSkeleton count={5} delay={0} />
+          ) : (
+            chapters.map((chapter, index) => (
             <div 
               key={chapter.id}
               className={`
@@ -115,7 +128,8 @@ export default function ChaptersList({
                 </div>
               </div>
             </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Action Buttons */}
