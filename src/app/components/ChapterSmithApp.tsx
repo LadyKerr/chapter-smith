@@ -9,7 +9,7 @@ import URLInput from './URLInput';
 import TranscriptLoader from './TranscriptLoader';
 import SRTUpload from './SRTUpload';
 import ChaptersList from './ChaptersList';
-import ExportButton from './ExportButton';
+// import ExportButton from './ExportButton'; // Currently unused
 import ErrorDisplay from './ErrorDisplay';
 
 type AppState = 'input' | 'processing' | 'upload' | 'chapters' | 'error';
@@ -51,7 +51,7 @@ export default function ChapterSmithApp() {
         throw new Error(urlValidation.error || 'Invalid URL');
       }
 
-      setVideoInfo(urlValidation.videoInfo);
+      setVideoInfo(urlValidation.videoInfo || null);
       setProcessingState({
         status: 'extracting',
         progress: 40,
@@ -90,8 +90,8 @@ export default function ChapterSmithApp() {
         setAppState('chapters');
       }, 1000);
 
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'An unknown error occurred');
       setAppState('error');
     }
   };
@@ -127,10 +127,10 @@ export default function ChapterSmithApp() {
         setAppState('chapters');
       }, 1000);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       setUploadState({
         status: 'error',
-        error: error.message
+        error: error instanceof Error ? error.message : 'An unknown error occurred'
       });
     }
   };

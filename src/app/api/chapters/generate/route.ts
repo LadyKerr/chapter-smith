@@ -137,7 +137,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       transcript = transcriptResponse.data.segments;
       videoInfo = {
         title: transcriptResponse.data.title,
-        duration: transcriptResponse.data.duration,
+        duration: parseFloat(transcriptResponse.data.duration) || undefined,
         id: transcriptResponse.data.videoId
       };
     } else {
@@ -167,7 +167,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Generate chapters using AI
     const generationStartTime = Date.now();
-    const chapters = await generateChaptersWithAI(transcript, videoInfo, options);
+    const chapters = await generateChaptersWithAI(transcript, videoInfo || undefined, options);
     const generationTime = Date.now() - generationStartTime;
 
     if (!chapters || chapters.length === 0) {
@@ -184,9 +184,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Prepare response
     const response: ChapterGenerationResponse = {
-      videoInfo: videoInfo || {
+      videoInfo: videoInfo ? {
+        id: videoInfo.id || body.videoId || 'unknown',
+        title: videoInfo.title || 'Untitled Video',
+        description: '',
+        duration: videoInfo.duration?.toString() || totalDuration.toString(),
+        channelTitle: '',
+        publishedAt: '',
+        thumbnailUrl: '',
+        url: body.url || ''
+      } : {
         id: body.videoId || 'unknown',
         title: 'Untitled Video',
+        description: '',
         duration: totalDuration.toString(),
         channelTitle: '',
         publishedAt: '',
@@ -232,7 +242,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     await logProcessingMetrics({
       requestId,
       videoId: requestBody?.videoId || 'unknown',
+      transcriptFetchTimeMs: 0,
       chapterGenerationTimeMs: Date.now() - startTime,
+      totalProcessingTimeMs: Date.now() - startTime,
+      transcriptLength: 0,
+      chaptersGenerated: 0,
+      aiModel: DEFAULT_AI_CONFIG.model,
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -388,7 +403,12 @@ function extractVideoId(videoIdOrUrl: string): string {
 /**
  * Fetch transcript using Python script
  */
-async function fetchTranscript(videoIdOrUrl: string): Promise<APIResponse<any>> {
+async function fetchTranscript(videoIdOrUrl: string): Promise<APIResponse<{
+  segments: YouTubeTranscriptSegment[];
+  title: string;
+  duration: string;
+  videoId: string;
+}>> {
   try {
     const videoId = extractVideoId(videoIdOrUrl);
     const scriptPath = path.join(process.cwd(), 'api_caps.py');
@@ -405,10 +425,15 @@ async function fetchTranscript(videoIdOrUrl: string): Promise<APIResponse<any>> 
     }
 
     // Parse the JSON output from the Python script
-    const transcriptData = JSON.parse(stdout);
+    const transcriptData = JSON.parse(stdout) as {
+      transcript: { text: string; start: number; duration?: number }[];
+      title: string;
+      duration: string;
+      videoId: string;
+    };
     
     // Convert Python script output to expected format
-    const segments: YouTubeTranscriptSegment[] = transcriptData.transcript.map((segment: any) => ({
+    const segments: YouTubeTranscriptSegment[] = transcriptData.transcript.map((segment) => ({
       text: segment.text,
       start: segment.start,
       duration: segment.duration || 1 // Default duration if not provided
@@ -419,7 +444,7 @@ async function fetchTranscript(videoIdOrUrl: string): Promise<APIResponse<any>> 
       data: {
         videoId: videoId,
         title: transcriptData.title || 'Untitled Video',
-        duration: transcriptData.duration || Math.max(...segments.map(s => s.start + s.duration)),
+        duration: transcriptData.duration || Math.max(...segments.map(s => s.start + s.duration)).toString(),
         segments: segments
       },
       timestamp: new Date().toISOString(),
@@ -517,7 +542,7 @@ interface ChapterOptions {
 
 async function generateChaptersWithAI(
   transcript: YouTubeTranscriptSegment[],
-  videoInfo: VideoInfo,
+  videoInfo: VideoInfo | undefined,
   options: ChapterOptions
 ): Promise<GeneratedChapter[]> {
   const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
@@ -554,9 +579,9 @@ async function generateChaptersWithAI(
     // Call Anthropic API using SDK
     const message = await client.messages.create({
       model: DEFAULT_AI_CONFIG.model,
-      max_tokens: DEFAULT_AI_CONFIG.maxTokens,
-      temperature: DEFAULT_AI_CONFIG.temperature,
-      system: DEFAULT_AI_CONFIG.systemPrompt,
+      max_tokens: DEFAULT_AI_CONFIG.maxTokens || 4000,
+      temperature: DEFAULT_AI_CONFIG.temperature || 0.3,
+      system: DEFAULT_AI_CONFIG.systemPrompt || '',
       messages: [
         {
           role: 'user',

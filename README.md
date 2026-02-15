@@ -22,7 +22,7 @@ This project showcases the incredible potential of AI agents working autonomousl
 
 **Real Impact:** Content creators spend 2-4 hours manually creating chapters for long-form videos. Chapter Smith reduces this to 30 seconds while maintaining quality that rivals human-created chapters. Most YouTube videos do not include chapters because of how tedious this process is. Having video chapters also helps with SEO and viewer engagement.
 
-**Why I built it:**I chose to build this project because I've encountered this problem multiple times! I manually create chapters for youtube videos and it takes hours. I've always wished for a tool that could automate this process and save me time.
+**Why I built it:** I chose to build this project because I've encountered this problem multiple times! I manually create chapters for youtube videos and it takes hours. I've always wished for a tool that could automate this process and save me time.
 
 ## 🚀 Quick Start
 
@@ -42,9 +42,7 @@ cd chapter-smith
 npm install
 
 # Set up Python environment for transcript fetching
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
+npm run setup:python
 ```
 
 ### 2. Environment Setup
@@ -73,7 +71,7 @@ curl http://localhost:3000/api/health
 
 ## API Documentation
 
-Read the full api documentation here [API Docs](/API_README.md)
+Read the full api documentation here [API Docs](/docs/API_README.md)
 
 ## 🔧 API Key Management
 
@@ -130,15 +128,6 @@ ANTHROPIC_API_KEY=your_production_anthropic_key
 NEXT_PUBLIC_APP_URL=https://your-domain.com
 NODE_ENV=production
 ```
-
-**Deployment Platforms:**
-- ✅ **Vercel** (Recommended) - Zero-config deployment
-- ✅ **Railway** - Database-ready infrastructure  
-- ✅ **Render** - Simple container deployment
-- ✅ **Docker** - Self-hosted containerized deployment
-
-**Important:** Ensure Python 3.9+ is available in your deployment environment and install the required Python dependencies during the build process.
-
 
 ### Key Architectural Decisions
 

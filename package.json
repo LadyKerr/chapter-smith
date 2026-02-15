@@ -10,7 +10,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup:python": "python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt",
+    "setup:python:win": "python -m venv venv && venv\\Scripts\\activate && pip install -r requirements.txt"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",

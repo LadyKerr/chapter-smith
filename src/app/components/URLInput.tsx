@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { URLInputProps } from '../types';
-import { validateYouTubeURL, extractURLFromPaste, debounce } from '../utils';
+import { validateYouTubeURL, debounce } from '../utils';
+// import { extractURLFromPaste } from '../utils'; // Currently unused
 
 export default function URLInput({
   onSubmit,
@@ -37,7 +38,7 @@ export default function URLInput({
 
   useEffect(() => {
     debouncedValidation(url);
-  }, [url]);
+  }, [url, debouncedValidation]);
 
   // Show error state when error prop changes
   useEffect(() => {
@@ -61,7 +62,7 @@ export default function URLInput({
         setUrl(clipboardText);
         inputRef.current?.focus();
       }
-    } catch (error) {
+    } catch {
       console.warn('Clipboard access denied');
     }
   };

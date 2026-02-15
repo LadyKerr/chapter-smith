@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 /**
  * Health Check API Endpoint
@@ -34,7 +34,7 @@ export async function GET(): Promise<NextResponse> {
           }
         );
         services.youtube = testResponse.ok ? 'up' : 'degraded';
-      } catch (error) {
+      } catch {
         services.youtube = 'down';
       }
     }
@@ -50,7 +50,7 @@ export async function GET(): Promise<NextResponse> {
           signal: AbortSignal.timeout(5000) // 5 second timeout
         });
         services.anthropic = testResponse.ok ? 'up' : 'degraded';
-      } catch (error) {
+      } catch {
         services.anthropic = 'down';
       }
     }
