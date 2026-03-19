@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { 
-  APIResponse, 
+import {
+  APIResponse,
   ExportRequest,
   ExportResponse,
   ExportFormat,
@@ -10,6 +10,8 @@ import {
   APIErrorCode,
   ValidationResult
 } from '../../../types/api';
+import { exportRateLimiter } from '../../../lib/redis';
+import { isAuthenticated, getClientIdentifier } from '../../../lib/auth';
 
 // Export format configurations
 const EXPORT_FORMATS: Record<ExportFormat, {
@@ -86,10 +88,35 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const requestId = generateRequestId();
 
   try {
+    // Check authentication first
+    const authenticated = await isAuthenticated(request);
+    if (!authenticated) {
+      return createErrorResponse(
+        APIErrorCode.UNAUTHORIZED,
+        'Authentication required. Please provide a valid API key via x-api-key header.',
+        null,
+        401
+      );
+    }
+
+    // Check rate limiting
+    const identifier = getClientIdentifier(request);
+    const { success, reset } = await exportRateLimiter.limit(identifier);
+
+    if (!success) {
+      const retryAfter = Math.ceil((reset - Date.now()) / 1000);
+      return createErrorResponse(
+        APIErrorCode.RATE_LIMIT_EXCEEDED,
+        'Rate limit exceeded',
+        { retryAfter },
+        429
+      );
+    }
+
     // Parse and validate request body
     const body: ExportRequest = await request.json();
     const validation = validateExportRequest(body);
-    
+
     if (!validation.isValid) {
       return createErrorResponse(
         APIErrorCode.INVALID_FIELD_TYPE,

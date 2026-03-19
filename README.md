@@ -50,7 +50,23 @@ Create `.env.local` in the project root:
 # Required API Keys
 YOUTUBE_API_KEY=your_youtube_api_key_here
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
+
+# Optional: Redis for rate limiting and quota tracking (Recommended for production)
+UPSTASH_REDIS_REST_URL=https://your-redis-url.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_redis_token_here
+
+# Optional: Security configuration (defaults to false for development)
+REQUIRE_API_KEY=false
+API_KEYS=
+
+# Optional: Quota limits (defaults shown below)
+YOUTUBE_DAILY_QUOTA_LIMIT=10000
+YOUTUBE_HOURLY_QUOTA_LIMIT=500
+ANTHROPIC_DAILY_QUOTA_LIMIT=1000
+ANTHROPIC_HOURLY_QUOTA_LIMIT=100
 ```
+
+See `.env.example` for more configuration options.
 
 ### 3. Start Development Server
 
@@ -69,7 +85,28 @@ curl http://localhost:3000/api/health
 
 ## API Documentation
 
-Read the full api documentation here [API Docs](/API_README.md)
+Read the full API documentation here [API Docs](/API_README.md)
+
+**Security:** See [API Security Documentation](/docs/API_SECURITY.md) for authentication, rate limiting, and quota management details.
+
+## 🔒 Security Features
+
+Chapter Smith includes comprehensive security features to prevent abuse and protect API quotas:
+
+- **Authentication**: API key-based authentication via `x-api-key` header
+- **Rate Limiting**: Per-client rate limits using Redis-backed sliding window algorithm
+- **Quota Management**: Daily and hourly quotas for YouTube and Anthropic APIs
+- **Multi-instance Support**: Durable rate limiting works across deployments
+
+**For Production:** Enable authentication and configure Redis:
+```bash
+REQUIRE_API_KEY=true
+API_KEYS=your_secure_api_key_here
+UPSTASH_REDIS_REST_URL=https://your-redis-url.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_redis_token_here
+```
+
+See [API Security Documentation](/docs/API_SECURITY.md) for complete setup instructions.
 
 ## 🔧 API Key Management
 
@@ -106,9 +143,11 @@ Read the full api documentation here [API Docs](/API_README.md)
 ```json
 {
   "react": "19.1.0",
-  "next": "15.4.6", 
+  "next": "15.4.6",
   "@anthropic-ai/sdk": "^0.24.0",
-  "youtube-transcript": "^1.2.1"
+  "youtube-transcript": "^1.2.1",
+  "@upstash/redis": "latest",
+  "@upstash/ratelimit": "latest"
 }
 ```
 
@@ -133,10 +172,21 @@ Read the full api documentation here [API Docs](/API_README.md)
 
 **Environment Variables for Production:**
 ```bash
+# Required
 YOUTUBE_API_KEY=your_production_youtube_key
 ANTHROPIC_API_KEY=your_production_anthropic_key
 NEXT_PUBLIC_APP_URL=https://your-domain.com
 NODE_ENV=production
+
+# Security (Recommended)
+REQUIRE_API_KEY=true
+API_KEYS=your_secure_api_key
+UPSTASH_REDIS_REST_URL=https://your-redis-url.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_redis_token
+
+# Optional: Custom quota limits
+YOUTUBE_DAILY_QUOTA_LIMIT=10000
+ANTHROPIC_DAILY_QUOTA_LIMIT=1000
 ```
 
 **Deployment Platforms:**

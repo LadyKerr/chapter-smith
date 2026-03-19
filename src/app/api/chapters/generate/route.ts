@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { 
-  APIResponse, 
+import {
+  APIResponse,
   ChapterGenerationRequest,
   ChapterGenerationResponse,
   GeneratedChapter,
@@ -10,6 +10,8 @@ import {
   AIModelConfig,
   ProcessingMetrics
 } from '../../../types/api';
+import { chapterGenerationRateLimiter, checkAndIncrementQuota, QUOTA_KEYS, QUOTA_LIMITS } from '../../../lib/redis';
+import { isAuthenticated, getClientIdentifier } from '../../../lib/auth';
 
 // AI model configuration
 const DEFAULT_AI_CONFIG: AIModelConfig = {
@@ -82,11 +84,67 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   let videoId: string | undefined;
 
   try {
+    // Check authentication first
+    const authenticated = await isAuthenticated(request);
+    if (!authenticated) {
+      return createErrorResponse(
+        APIErrorCode.UNAUTHORIZED,
+        'Authentication required. Please provide a valid API key via x-api-key header.',
+        null,
+        401
+      );
+    }
+
+    // Check rate limiting
+    const identifier = getClientIdentifier(request);
+    const { success, reset } = await chapterGenerationRateLimiter.limit(identifier);
+
+    if (!success) {
+      const retryAfter = Math.ceil((reset - Date.now()) / 1000);
+      return createErrorResponse(
+        APIErrorCode.RATE_LIMIT_EXCEEDED,
+        'Rate limit exceeded',
+        { retryAfter },
+        429
+      );
+    }
+
+    // Check Anthropic API quota (both daily and hourly)
+    const dailyQuota = await checkAndIncrementQuota(
+      QUOTA_KEYS.ANTHROPIC_DAILY,
+      QUOTA_LIMITS.ANTHROPIC_DAILY,
+      86400 // 24 hours
+    );
+
+    if (!dailyQuota.available) {
+      return createErrorResponse(
+        APIErrorCode.ANTHROPIC_QUOTA_EXCEEDED,
+        'Anthropic API daily quota exceeded',
+        { resetTime: dailyQuota.resetTime },
+        503
+      );
+    }
+
+    const hourlyQuota = await checkAndIncrementQuota(
+      QUOTA_KEYS.ANTHROPIC_HOURLY,
+      QUOTA_LIMITS.ANTHROPIC_HOURLY,
+      3600 // 1 hour
+    );
+
+    if (!hourlyQuota.available) {
+      return createErrorResponse(
+        APIErrorCode.ANTHROPIC_QUOTA_EXCEEDED,
+        'Anthropic API hourly quota exceeded',
+        { resetTime: hourlyQuota.resetTime },
+        503
+      );
+    }
+
     // Parse and validate request body
     const body: ChapterGenerationRequest = await request.json();
     videoId = body.videoId;
     const validation = validateChapterRequest(body);
-    
+
     if (!validation.isValid) {
       return createErrorResponse(
         APIErrorCode.INVALID_FIELD_TYPE,

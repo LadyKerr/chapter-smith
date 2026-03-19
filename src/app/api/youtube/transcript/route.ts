@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 // Note: youtube-transcript is imported dynamically to handle optional dependency
-import { 
-  APIResponse, 
-  YouTubeTranscriptResponse, 
+import {
+  APIResponse,
+  YouTubeTranscriptResponse,
   APIErrorCode,
   ValidationResult,
   TranscriptFetchOptions,
   YouTubeVideoInfo,
   YouTubeTranscriptSegment
 } from '../../../types/api';
+import { transcriptRateLimiter, checkAndIncrementQuota, QUOTA_KEYS, QUOTA_LIMITS } from '../../../lib/redis';
+import { isAuthenticated, getClientIdentifier } from '../../../lib/auth';
 
-// Rate limiting configuration
+// Rate limiting configuration (kept for reference, actual limits in lib/redis.ts)
 const RATE_LIMIT_REQUESTS = 100; // requests per hour
 const RATE_LIMIT_WINDOW = 3600; // 1 hour in seconds
 
@@ -62,10 +64,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
+    // Check authentication first
+    const authenticated = await isAuthenticated(request);
+    if (!authenticated) {
+      return createErrorResponse(
+        APIErrorCode.UNAUTHORIZED,
+        'Authentication required. Please provide a valid API key via x-api-key header.',
+        null,
+        401
+      );
+    }
+
     // Parse and validate request body
     body = await request.json();
     const validation = validateTranscriptRequest(body);
-    
+
     if (!validation.isValid) {
       return createErrorResponse(
         APIErrorCode.INVALID_FIELD_TYPE,
@@ -635,24 +648,68 @@ async function fetchTranscriptFallback(
 }
 
 /**
- * Check rate limiting for the current request
+ * Check rate limiting for the current request using Upstash Redis
  */
 async function checkRateLimit(request: NextRequest): Promise<{ allowed: boolean; retryAfter?: number }> {
-  // Get client identifier (IP address or user ID)
-  getClientIdentifier(request);
-  
-  // In a real implementation, you would use Redis or similar for rate limiting
-  // This is a simplified in-memory example
-  
-  return { allowed: true }; // Mock implementation
+  try {
+    // Get client identifier (API key or IP address)
+    const identifier = getClientIdentifier(request);
+
+    // Check rate limit using Upstash rate limiter
+    const { success, reset } = await transcriptRateLimiter.limit(identifier);
+
+    if (!success) {
+      // Calculate retry after time in seconds
+      const retryAfter = Math.ceil((reset - Date.now()) / 1000);
+      return { allowed: false, retryAfter };
+    }
+
+    return { allowed: true };
+  } catch (error) {
+    console.error('Rate limit check error:', error);
+    // On error, allow request but log the issue
+    return { allowed: true };
+  }
 }
 
 /**
- * Check YouTube API quota availability
+ * Check YouTube API quota availability using Redis-backed tracking
  */
 async function checkYouTubeQuota(): Promise<{ available: boolean; resetTime?: number }> {
-  // In a real implementation, track quota usage in database/cache
-  return { available: true }; // Mock implementation
+  try {
+    // Check both daily and hourly quotas
+    const dailyQuota = await checkAndIncrementQuota(
+      QUOTA_KEYS.YOUTUBE_DAILY,
+      QUOTA_LIMITS.YOUTUBE_DAILY,
+      86400 // 24 hours in seconds
+    );
+
+    if (!dailyQuota.available) {
+      return {
+        available: false,
+        resetTime: dailyQuota.resetTime,
+      };
+    }
+
+    const hourlyQuota = await checkAndIncrementQuota(
+      QUOTA_KEYS.YOUTUBE_HOURLY,
+      QUOTA_LIMITS.YOUTUBE_HOURLY,
+      3600 // 1 hour in seconds
+    );
+
+    if (!hourlyQuota.available) {
+      return {
+        available: false,
+        resetTime: hourlyQuota.resetTime,
+      };
+    }
+
+    return { available: true };
+  } catch (error) {
+    console.error('Quota check error:', error);
+    // On error, allow request but log the issue
+    return { available: true };
+  }
 }
 
 /**
@@ -674,15 +731,6 @@ function parseDurationToSeconds(duration: string): number {
  */
 function generateRequestId(): string {
   return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
-
-/**
- * Get client identifier for rate limiting
- */
-function getClientIdentifier(request: NextRequest): string {
-  // Try to get user ID from session/auth
-  // Fallback to IP address
-  return request.ip || request.headers.get('x-forwarded-for') || 'anonymous';
 }
 
 /**
