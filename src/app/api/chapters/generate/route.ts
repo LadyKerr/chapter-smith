@@ -10,6 +10,7 @@ import {
   AIModelConfig,
   ProcessingMetrics
 } from '../../../types/api';
+import { sanitizeErrorDetails } from '../../../utils/sanitize';
 
 // AI model configuration
 const DEFAULT_AI_CONFIG: AIModelConfig = {
@@ -652,30 +653,6 @@ function createSuccessResponse<T>(data: T): NextResponse {
   };
   
   return NextResponse.json(response, { status: 200 });
-}
-
-/**
- * Sanitize error details to prevent leaking sensitive information (API keys, URLs, raw error bodies)
- */
-function sanitizeErrorDetails(details: unknown): unknown {
-  if (!details || typeof details !== 'object') return details;
-
-  const sensitiveKeys = ['url', 'errorBody', 'apiKey', 'key', 'token', 'secret', 'password', 'authorization'];
-  const sanitized = { ...(details as Record<string, unknown>) };
-
-  for (const key of sensitiveKeys) {
-    if (key in sanitized) {
-      delete sanitized[key];
-    }
-  }
-
-  for (const [key, value] of Object.entries(sanitized)) {
-    if (typeof value === 'string' && /[?&]key=/.test(value)) {
-      sanitized[key] = '[redacted]';
-    }
-  }
-
-  return Object.keys(sanitized).length > 0 ? sanitized : null;
 }
 
 /**
