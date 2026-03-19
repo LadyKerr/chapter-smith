@@ -35,6 +35,8 @@ npm run dev
 ```bash
 # Health check
 curl http://localhost:3000/api/health
+# Internal readiness (requires token)
+curl -H "Authorization: Bearer $INTERNAL_HEALTH_TOKEN" http://localhost:3000/api/health
 
 # Test transcript fetching
 curl -X POST http://localhost:3000/api/youtube/transcript \
@@ -50,7 +52,7 @@ curl -X POST http://localhost:3000/api/chapters/generate \
 ## API Endpoints
 
 ### Health Check
-- **GET** `/api/health` - System health and service status
+- **GET** `/api/health` - Public liveness; internal readiness when authorized
 
 ### YouTube Transcript
 - **POST** `/api/youtube/transcript` - Fetch video transcripts
@@ -147,14 +149,14 @@ REDIS_URL=redis://localhost:6379
 ### Health Endpoint
 Check service status:
 ```bash
-curl http://localhost:3000/api/health
+curl http://localhost:3000/api/health                  # liveness only
+curl -H "Authorization: Bearer $INTERNAL_HEALTH_TOKEN" \
+  http://localhost:3000/api/health                     # readiness + dependencies
 ```
 
-Response includes:
-- Overall system status
-- Individual service health
-- Performance metrics
-- Configuration status
+Responses:
+- Public: minimal `{ "status": "ok" }` liveness
+- Authorized: readiness with provider status, cached for 5 minutes to prevent probe storms
 
 ### Logging
 All requests include:
@@ -203,6 +205,7 @@ artillery quick --count 10 --num 5 http://localhost:3000/api/health
 Ensure all required environment variables are set:
 - `YOUTUBE_API_KEY` (required)
 - `ANTHROPIC_API_KEY` (required)
+- `INTERNAL_HEALTH_TOKEN` (required for readiness checks)
 - `NEXT_PUBLIC_APP_URL` (for internal API calls)
 
 ### Platform Specific

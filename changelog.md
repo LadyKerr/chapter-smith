@@ -14,3 +14,5 @@
   - Lines 503-557: Added try-catch for JSON parsing and returns mock data on error
   - Added development mode checks to return mock data when no transcript is available
 
+### Security
+- (2026-03-19) Restricted `/api/health` to return only minimal public liveness while protecting cached provider readiness behind a bearer token. Provider probes are cached for 5 minutes to avoid unauthenticated reconnaissance and probe storms. User prompt: "[Security] Restrict health endpoint details"
