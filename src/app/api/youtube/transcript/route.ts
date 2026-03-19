@@ -334,17 +334,15 @@ async function fetchVideoInfo(videoId: string): Promise<YouTubeVideoInfo | null>
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`YouTube API error: ${response.status} - ${errorText}`);
+      await response.text(); // Consume response body
+      console.error(`YouTube API error: ${response.status} - [response body redacted]`);
       
       throw new YouTubeAPIError(
         APIErrorCode.EXTERNAL_SERVICE_ERROR,
         `YouTube API error: ${response.status}`,
         { 
           status: response.status, 
-          statusText: response.statusText,
-          errorBody: errorText,
-          url: url
+          statusText: response.statusText
         },
         response.status
       );
@@ -715,6 +713,31 @@ function createSuccessResponse<T>(data: T): NextResponse {
 }
 
 /**
+ * Sanitize error details to prevent leaking sensitive information (API keys, URLs, raw error bodies)
+ */
+function sanitizeErrorDetails(details: unknown): unknown {
+  if (!details || typeof details !== 'object') return details;
+
+  const sensitiveKeys = ['url', 'errorBody', 'apiKey', 'key', 'token', 'secret', 'password', 'authorization'];
+  const sanitized = { ...(details as Record<string, unknown>) };
+
+  for (const key of sensitiveKeys) {
+    if (key in sanitized) {
+      delete sanitized[key];
+    }
+  }
+
+  // Also redact any string values that look like they contain API keys or URLs with keys
+  for (const [key, value] of Object.entries(sanitized)) {
+    if (typeof value === 'string' && /[?&]key=/.test(value)) {
+      sanitized[key] = '[redacted]';
+    }
+  }
+
+  return Object.keys(sanitized).length > 0 ? sanitized : null;
+}
+
+/**
  * Create standardized error response
  */
 function createErrorResponse(
@@ -728,7 +751,7 @@ function createErrorResponse(
     error: {
       code,
       message,
-      details,
+      details: sanitizeErrorDetails(details),
       ...(process.env.NODE_ENV === 'development' && { stack: new Error().stack })
     },
     timestamp: new Date().toISOString(),
