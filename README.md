@@ -50,6 +50,8 @@ Create `.env.local` in the project root:
 # Required API Keys
 YOUTUBE_API_KEY=your_youtube_api_key_here
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
+# Optional: required to view readiness checks
+INTERNAL_HEALTH_TOKEN=choose_a_long_random_value
 ```
 
 ### 3. Start Development Server
@@ -65,6 +67,8 @@ Visit `http://localhost:3000` and paste any YouTube URL to see the magic happen!
 Test the health endpoint:
 ```bash
 curl http://localhost:3000/api/health
+# Detailed readiness (internal use)
+curl -H "Authorization: Bearer $INTERNAL_HEALTH_TOKEN" http://localhost:3000/api/health
 ```
 
 ## API Documentation
