@@ -55,7 +55,7 @@ export default function ExportButton({
         }
       }, 2000);
 
-    } catch (error) {
+    } catch {
       clearInterval(progressInterval);
       setExportState('error');
       onExportComplete?.(format, false);
@@ -105,8 +105,9 @@ export default function ExportButton({
         onClick={() => setIsModalOpen(true)}
         className="inline-flex items-center justify-center px-6 py-3 text-base font-medium 
                  text-white bg-blue-500 hover:bg-blue-600 rounded-lg 
-                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                 transition-all duration-200 transform hover:scale-105 active:scale-95"
+                 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-50
+                 transition-all duration-200 transform hover:scale-105 active:scale-95
+                 dark:bg-blue-500 dark:hover:bg-blue-400 dark:focus:ring-blue-400 dark:focus:ring-offset-slate-950"
       >
         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
@@ -117,24 +118,23 @@ export default function ExportButton({
 
       {/* Export Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 
                       animate-fade-in" onClick={() => setIsModalOpen(false)}>
           <div 
-            className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 max-w-2xl w-full mx-4 
-                     transform transition-all duration-300 animate-modal-appear"
+            className="mx-4 w-full max-w-2xl transform rounded-2xl border border-slate-200 bg-white p-8 shadow-xl transition-all duration-300 animate-modal-appear dark:border-slate-800 dark:bg-slate-900 dark:shadow-slate-950/40"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-2xl font-semibold text-gray-900">Export Your Chapters</h2>
-                <p className="text-base text-gray-600 mt-1">
-                  Choose your preferred format and copy or download
-                </p>
-              </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors duration-200"
+                 <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Export Your Chapters</h2>
+                 <p className="mt-1 text-base text-slate-600 dark:text-slate-300">
+                   Choose your preferred format and copy or download
+                 </p>
+               </div>
+               <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="rounded-lg p-2 text-slate-400 transition-colors duration-200 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-200"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -144,37 +144,37 @@ export default function ExportButton({
 
             {/* Export Progress (when exporting) */}
             {exportState === 'exporting' && (
-              <div className="mb-8 p-6 bg-blue-50 rounded-lg animate-fade-in">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                    <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Exporting {EXPORT_FORMATS.find(f => f.id === currentFormat)?.name}
-                  </h3>
-                  <div className="w-full max-w-xs mx-auto">
-                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                      <div 
-                        className="h-full bg-blue-500 rounded-full transition-all duration-300"
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                    <p className="text-sm text-gray-600 mt-2">{progress}% complete</p>
-                  </div>
+               <div className="mb-8 rounded-lg bg-blue-50 p-6 animate-fade-in dark:bg-blue-950/30">
+                 <div className="text-center">
+                   <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 animate-pulse dark:bg-blue-500/15">
+                     <div className="h-8 w-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin dark:border-blue-300" />
+                   </div>
+                   <h3 className="mb-2 text-lg font-medium text-slate-900 dark:text-slate-100">
+                     Exporting {EXPORT_FORMATS.find(f => f.id === currentFormat)?.name}
+                   </h3>
+                   <div className="w-full max-w-xs mx-auto">
+                     <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+                       <div 
+                         className="h-full rounded-full bg-blue-500 transition-all duration-300 dark:bg-blue-400"
+                         style={{ width: `${progress}%` }}
+                       />
+                     </div>
+                     <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{progress}% complete</p>
+                   </div>
                 </div>
               </div>
             )}
 
             {/* Success Message */}
             {exportState === 'success' && (
-              <div className="mb-8 p-6 bg-green-50 border border-green-200 rounded-lg animate-fade-in">
+               <div className="mb-8 rounded-lg border border-green-200 bg-green-50 p-6 animate-fade-in dark:border-green-500/40 dark:bg-green-950/30">
                 <div className="flex items-center justify-center text-center">
                   <svg className="w-8 h-8 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <div>
-                    <p className="text-lg font-medium text-green-800">Export completed!</p>
-                    <p className="text-sm text-green-600">Your chapters are ready</p>
+                     <p className="text-lg font-medium text-green-800 dark:text-green-200">Export completed!</p>
+                     <p className="text-sm text-green-600 dark:text-green-300">Your chapters are ready</p>
                   </div>
                 </div>
               </div>
@@ -184,28 +184,28 @@ export default function ExportButton({
             {exportState !== 'exporting' && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                 {EXPORT_FORMATS.map((format) => (
-                  <div key={format.id} className="border border-gray-200 rounded-lg p-6 hover:border-blue-300 hover:shadow-sm transition-all duration-200">
-                    <div className="text-center">
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 bg-gray-50">
-                        {getFormatIcon(format.icon)}
-                      </div>
-                      <h3 className="text-sm font-semibold text-gray-900 mb-2">{format.name}</h3>
-                      <p className="text-xs text-gray-600 mb-4 h-12 flex items-center justify-center">
-                        {format.description}
-                      </p>
+                   <div key={format.id} className="rounded-lg border border-slate-200 p-6 transition-all duration-200 hover:border-blue-300 hover:shadow-sm dark:border-slate-800 dark:hover:border-blue-500 dark:hover:bg-slate-800/60">
+                     <div className="text-center">
+                       <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800">
+                         {getFormatIcon(format.icon)}
+                       </div>
+                       <h3 className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">{format.name}</h3>
+                       <p className="mb-4 flex h-12 items-center justify-center text-xs text-slate-600 dark:text-slate-300">
+                         {format.description}
+                       </p>
                       <div className="space-y-2">
                         <button
                           type="button"
                           onClick={() => handleExport(format.id, 'copy')}
                           disabled={exportState === 'exporting'}
                           className={`w-full px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 
-                                   focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50
-                                   ${format.id === 'youtube' 
-                                     ? 'text-white bg-red-600 hover:bg-red-700 focus:ring-red-500' 
-                                     : format.id === 'json'
-                                     ? 'text-blue-700 bg-blue-100 hover:bg-blue-200 focus:ring-blue-500'
-                                     : 'text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-gray-500'
-                                   }`}
+                                   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-50 disabled:opacity-50 dark:focus:ring-offset-slate-950
+                                    ${format.id === 'youtube' 
+                                      ? 'text-white bg-red-600 hover:bg-red-700 focus:ring-red-500 dark:bg-red-600 dark:hover:bg-red-500 dark:focus:ring-red-400' 
+                                      : format.id === 'json'
+                                      ? 'text-blue-700 bg-blue-100 hover:bg-blue-200 focus:ring-blue-500 dark:bg-blue-950/40 dark:text-blue-200 dark:hover:bg-blue-950/60 dark:focus:ring-blue-400'
+                                      : 'text-slate-700 bg-slate-100 hover:bg-slate-200 focus:ring-slate-500 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:focus:ring-slate-400'
+                                    }`}
                         >
                           Copy {format.id === 'youtube' ? 'for YouTube' : 'as ' + format.name}
                         </button>
@@ -213,9 +213,10 @@ export default function ExportButton({
                           type="button"
                           onClick={() => handleExport(format.id, 'download')}
                           disabled={exportState === 'exporting'}
-                          className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 
-                                   hover:bg-gray-50 rounded-md transition-colors duration-200 focus:outline-none 
-                                   focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+                           className="w-full rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 
+                                    transition-colors duration-200 hover:bg-slate-50 focus:outline-none 
+                                    focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-50 disabled:opacity-50
+                                    dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus:ring-blue-400 dark:focus:ring-offset-slate-950"
                         >
                           Download .{format.extension}
                         </button>
@@ -229,24 +230,24 @@ export default function ExportButton({
             {/* Mobile Optimized Layout */}
             <div className="md:hidden">
               {exportState !== 'exporting' && EXPORT_FORMATS.map((format) => (
-                <div key={`mobile-${format.id}`} className="border border-gray-200 rounded-lg p-4 mb-4 last:mb-0">
+                 <div key={`mobile-${format.id}`} className="mb-4 rounded-lg border border-slate-200 p-4 last:mb-0 dark:border-slate-800 dark:bg-slate-800/60">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 bg-gray-50">
-                        {getFormatIcon(format.icon)}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{format.name}</p>
-                        <p className="text-xs text-gray-500">{format.description}</p>
-                      </div>
+                       <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800">
+                         {getFormatIcon(format.icon)}
+                       </div>
+                       <div>
+                         <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{format.name}</p>
+                         <p className="text-xs text-slate-500 dark:text-slate-400">{format.description}</p>
+                       </div>
                     </div>
                     <div className="flex space-x-2">
                       <button
                         type="button"
                         onClick={() => handleExport(format.id, 'copy')}
                         disabled={exportState === 'exporting'}
-                        className="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 
-                                 rounded-md transition-colors duration-200 disabled:opacity-50"
+                         className="rounded-md bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600 
+                                  transition-colors duration-200 hover:bg-blue-100 disabled:opacity-50 dark:bg-blue-950/30 dark:text-blue-300 dark:hover:bg-blue-950/50"
                       >
                         Copy
                       </button>
@@ -254,8 +255,8 @@ export default function ExportButton({
                         type="button"
                         onClick={() => handleExport(format.id, 'download')}
                         disabled={exportState === 'exporting'}
-                        className="px-3 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 
-                                 rounded-md transition-colors duration-200 disabled:opacity-50"
+                         className="rounded-md bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 
+                                  transition-colors duration-200 hover:bg-slate-200 disabled:opacity-50 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                       >
                         Download
                       </button>
@@ -271,9 +272,8 @@ export default function ExportButton({
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 
-                           rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 
-                           focus:ring-gray-500 focus:ring-offset-2"
+                   className="rounded-lg bg-slate-100 px-6 py-2 text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-200 focus:outline-none focus:ring-2 
+                           focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:focus:ring-slate-400 dark:focus:ring-offset-slate-950"
                 >
                   Close
                 </button>
