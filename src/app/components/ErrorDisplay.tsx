@@ -149,11 +149,11 @@ export default function ErrorDisplay({
 
     switch (variant) {
       case 'primary':
-        return `${base} text-white bg-blue-500 hover:bg-blue-600 focus:ring-blue-500`;
+        return `${base} text-white bg-blue-500 hover:bg-blue-600 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400 dark:focus:ring-blue-400 dark:focus:ring-offset-slate-950`;
       case 'secondary':
-        return `${base} text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-gray-500`;
+        return `${base} text-slate-700 bg-slate-100 hover:bg-slate-200 focus:ring-slate-500 dark:text-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:focus:ring-slate-400 dark:focus:ring-offset-slate-950`;
       case 'outline':
-        return `${base} text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:ring-blue-500`;
+        return `${base} text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 focus:ring-blue-500 dark:text-slate-200 dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800 dark:focus:ring-blue-400 dark:focus:ring-offset-slate-950`;
       default:
         return base;
     }
@@ -161,27 +161,27 @@ export default function ErrorDisplay({
 
   return (
     <div className="w-full max-w-2xl mx-auto px-6 py-8">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 text-center animate-fade-in">
+      <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-lg animate-fade-in dark:border-slate-800 dark:bg-slate-900 dark:shadow-slate-950/40">
         {/* Error Icon */}
-        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-gentle">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 animate-bounce-gentle dark:bg-red-500/15">
           {getErrorIcon()}
         </div>
 
         {/* Error Message */}
-        <h2 className="text-2xl font-semibold text-gray-900 mb-4 animate-fade-in-up">
+        <h2 className="mb-4 text-2xl font-semibold text-slate-900 animate-fade-in-up dark:text-slate-100">
           {getErrorTitle()}
         </h2>
-        <p className="text-base text-gray-600 mb-6 max-w-md mx-auto animate-fade-in-up delay-200">
+        <p className="mx-auto mb-6 max-w-md text-base text-slate-600 animate-fade-in-up delay-200 dark:text-slate-300">
           {errorMessage}
         </p>
 
         {/* Possible Causes */}
-        <div className="text-left bg-gray-50 rounded-lg p-6 mb-8 max-w-md mx-auto animate-fade-in-up delay-400">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">This might be because:</h3>
-          <ul className="space-y-2 text-sm text-gray-600">
+        <div className="mx-auto mb-8 max-w-md rounded-lg bg-slate-50 p-6 text-left animate-fade-in-up delay-400 dark:bg-slate-800/80">
+          <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">This might be because:</h3>
+          <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
             {getPossibleCauses().map((cause, index) => (
               <li key={index} className="flex items-start animate-fade-in-left" style={{ animationDelay: `${0.6 + index * 0.1}s` }}>
-                <span className="block w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                <span className="mt-2 mr-3 block h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400 dark:bg-slate-500"></span>
                 {cause}
               </li>
             ))}
@@ -206,13 +206,13 @@ export default function ErrorDisplay({
         )}
 
         {/* Support Link */}
-        <div className="mt-8 pt-6 border-t border-gray-200 animate-fade-in-up delay-1000">
-          <p className="text-sm text-gray-500 mb-2">
+        <div className="mt-8 border-t border-slate-200 pt-6 animate-fade-in-up delay-1000 dark:border-slate-800">
+          <p className="mb-2 text-sm text-slate-500 dark:text-slate-400">
             Still having trouble?
           </p>
           <button
             type="button"
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium underline transition-colors duration-200"
+            className="text-sm font-medium text-blue-600 underline transition-colors duration-200 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
           >
             Contact Support
           </button>

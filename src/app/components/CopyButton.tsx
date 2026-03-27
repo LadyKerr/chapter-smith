@@ -34,7 +34,7 @@ export default function CopyButton({
       } else {
         throw new Error('Copy failed');
       }
-    } catch (error) {
+    } catch {
       setCopyState('error');
       onCopyComplete?.(false);
       setTimeout(() => setCopyState('idle'), 3000);
@@ -44,7 +44,7 @@ export default function CopyButton({
   const getBaseClasses = () => {
     const base = `
       inline-flex items-center justify-center font-medium rounded-lg 
-      focus:outline-none focus:ring-2 focus:ring-offset-2 
+      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-950
       transition-all duration-200 transform active:scale-95
       disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
       relative overflow-hidden group
@@ -61,17 +61,17 @@ export default function CopyButton({
 
   const getVariantClasses = () => {
     if (copyState === 'success') {
-      return 'text-white bg-green-500 hover:bg-green-600 focus:ring-green-500 animate-success-wiggle';
+      return 'text-white bg-green-500 hover:bg-green-600 focus:ring-green-500 animate-success-wiggle dark:bg-green-500 dark:hover:bg-green-400 dark:focus:ring-green-400';
     }
     
     if (copyState === 'error') {
-      return 'text-white bg-red-500 hover:bg-red-600 focus:ring-red-500 animate-error-shake';
+      return 'text-white bg-red-500 hover:bg-red-600 focus:ring-red-500 animate-error-shake dark:bg-red-500 dark:hover:bg-red-400 dark:focus:ring-red-400';
     }
 
     const variants = {
-      primary: 'text-white bg-blue-500 hover:bg-blue-600 focus:ring-blue-500 hover:scale-105 hover:shadow-lg',
-      secondary: 'text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-gray-500 hover:scale-105 hover:shadow-md',
-      success: 'text-white bg-green-500 hover:bg-green-600 focus:ring-green-500 hover:scale-105 hover:shadow-lg'
+      primary: 'text-white bg-blue-500 hover:bg-blue-600 focus:ring-blue-500 hover:scale-105 hover:shadow-lg dark:bg-blue-500 dark:hover:bg-blue-400 dark:focus:ring-blue-400',
+      secondary: 'text-slate-700 bg-slate-100 hover:bg-slate-200 focus:ring-slate-500 hover:scale-105 hover:shadow-md dark:text-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:focus:ring-slate-400',
+      success: 'text-white bg-green-500 hover:bg-green-600 focus:ring-green-500 hover:scale-105 hover:shadow-lg dark:bg-green-500 dark:hover:bg-green-400 dark:focus:ring-green-400'
     };
 
     return variants[variant];
@@ -160,12 +160,11 @@ export default function CopyButton({
       {showFeedback && (
         <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-50 
                       animate-float-up pointer-events-none">
-          <div className="bg-gray-900 text-white px-3 py-1 rounded-md text-xs font-medium 
-                        shadow-lg relative whitespace-nowrap">
+          <div className="relative whitespace-nowrap rounded-md bg-gray-900 px-3 py-1 text-xs font-medium text-white shadow-lg dark:bg-slate-100 dark:text-slate-900">
             Copied to clipboard!
             {/* Tooltip Arrow */}
             <div className="absolute top-full left-1/2 transform -translate-x-1/2 
-                          border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900" />
+                          border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-slate-100" />
           </div>
         </div>
       )}

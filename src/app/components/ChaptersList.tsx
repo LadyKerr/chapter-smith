@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChaptersListProps } from '../types';
+import { Chapter, ChaptersListProps } from '../types';
 import { formatChaptersForExport } from '../utils';
 import CopyButton from './CopyButton';
 
@@ -27,23 +27,22 @@ export default function ChaptersList({
     }
   };
 
-  const handleCopyChapter = (chapter: any) => {
-    const chapterText = `${chapter.timestamp} ${chapter.title}`;
+  const handleCopyChapter = (chapter: Chapter) => {
     onCopyChapter(chapter);
   };
 
   return (
     <div className="w-full max-w-4xl mx-auto px-6 py-8">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 animate-fade-in">
+      <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg animate-fade-in dark:border-slate-800 dark:bg-slate-900 dark:shadow-slate-950/40">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div className="animate-fade-in-up">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Chapters Generated</h2>
-            <p className="text-base text-gray-600">
-              Video: "{videoInfo.title}" • Duration: {videoInfo.duration}
+            <h2 className="mb-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">Chapters Generated</h2>
+            <p className="text-base text-slate-600 dark:text-slate-300">
+              Video: &quot;{videoInfo.title}&quot; • Duration: {videoInfo.duration}
             </p>
           </div>
-          <div className="mt-4 sm:mt-0 flex items-center text-sm text-gray-500 animate-fade-in-up delay-200">
+          <div className="mt-4 flex items-center text-sm text-slate-500 animate-fade-in-up delay-200 dark:text-slate-400 sm:mt-0">
             <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
@@ -53,18 +52,18 @@ export default function ChaptersList({
 
         {/* Success Message */}
         {showSuccessMessage && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg animate-slide-down">
+           <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 animate-slide-down dark:border-green-500/40 dark:bg-green-950/30">
             <div className="flex items-center">
               <svg className="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
               <div>
-                <p className="text-sm font-medium text-green-800">
-                  All chapters copied to clipboard!
-                </p>
-                <p className="text-xs text-green-700">
-                  Ready to paste into YouTube description
-                </p>
+                 <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                   All chapters copied to clipboard!
+                 </p>
+                 <p className="text-xs text-green-700 dark:text-green-300">
+                   Ready to paste into YouTube description
+                 </p>
               </div>
             </div>
           </div>
@@ -76,8 +75,9 @@ export default function ChaptersList({
             <div 
               key={chapter.id}
               className={`
-                group flex items-center justify-between p-4 border border-gray-200 rounded-lg 
-                hover:border-gray-300 hover:shadow-sm transition-all duration-200
+                group flex items-center justify-between rounded-lg border border-slate-200 p-4 
+                transition-all duration-200 hover:border-slate-300 hover:shadow-sm
+                dark:border-slate-800 dark:hover:border-slate-700 dark:hover:bg-slate-800/60
                 animate-fade-in-left
               `}
               style={{ animationDelay: `${index * 0.1}s` }}
@@ -87,18 +87,18 @@ export default function ChaptersList({
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
                     <span className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium 
-                                   bg-blue-100 text-blue-800 font-mono">
+                                   bg-blue-100 text-blue-800 font-mono dark:bg-blue-950/40 dark:text-blue-200">
                       {chapter.timestamp}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-medium text-gray-900 leading-snug">
-                      {chapter.title}
-                    </p>
-                    {chapter.description && (
-                      <p className="text-sm text-gray-500 mt-1">
-                        {chapter.description}
-                      </p>
+                     <p className="text-base font-medium leading-snug text-slate-900 dark:text-slate-100">
+                       {chapter.title}
+                     </p>
+                     {chapter.description && (
+                       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                         {chapter.description}
+                       </p>
                     )}
                   </div>
                 </div>
@@ -132,9 +132,10 @@ export default function ChaptersList({
             type="button"
             onClick={() => onExport('text')}
             className="inline-flex items-center justify-center px-6 py-3 text-base font-medium 
-                     text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg 
-                     focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
-                     transition-all duration-200 transform hover:scale-105 active:scale-95"
+                     rounded-lg bg-slate-100 text-slate-700 
+                     transition-all duration-200 transform hover:scale-105 hover:bg-slate-200 active:scale-95
+                     focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-50
+                     dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:focus:ring-slate-400 dark:focus:ring-offset-slate-950"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
@@ -147,9 +148,10 @@ export default function ChaptersList({
             type="button"
             onClick={onRegenerate}
             className="inline-flex items-center justify-center px-6 py-3 text-base font-medium 
-                     text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg 
-                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                     transition-all duration-200 transform hover:scale-105 active:scale-95"
+                     rounded-lg border border-slate-300 bg-white text-slate-700 
+                     transition-all duration-200 transform hover:scale-105 hover:bg-slate-50 active:scale-95
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-50
+                     dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus:ring-blue-400 dark:focus:ring-offset-slate-950"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
@@ -173,8 +175,8 @@ export default function ChaptersList({
             type="button"
             onClick={() => onExport('text')}
             className="flex items-center justify-center px-4 py-3 text-sm font-medium 
-                     text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg 
-                     transition-colors duration-200 touch-manipulation"
+                     rounded-lg bg-slate-100 text-slate-700 
+                     transition-colors duration-200 touch-manipulation dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             style={{ minHeight: '44px' }}
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,9 +192,8 @@ export default function ChaptersList({
           <button
             type="button"
             onClick={onRegenerate}
-            className="w-full px-4 py-3 text-sm font-medium text-gray-700 bg-white 
-                     border border-gray-300 hover:bg-gray-50 rounded-lg 
-                     transition-colors duration-200 touch-manipulation"
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 
+                     transition-colors duration-200 touch-manipulation hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             style={{ minHeight: '44px' }}
           >
             Try Again
@@ -200,27 +201,27 @@ export default function ChaptersList({
         </div>
 
         {/* Chapter Statistics */}
-        <div className="mt-8 pt-6 border-t border-gray-200 animate-fade-in-up delay-1000">
+        <div className="mt-8 border-t border-slate-200 pt-6 animate-fade-in-up delay-1000 dark:border-slate-800">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center text-sm">
             <div>
-              <p className="font-medium text-gray-900">{chapters.length}</p>
-              <p className="text-gray-500">Chapters</p>
+              <p className="font-medium text-slate-900 dark:text-slate-100">{chapters.length}</p>
+              <p className="text-slate-500 dark:text-slate-400">Chapters</p>
             </div>
             <div>
-              <p className="font-medium text-gray-900">{videoInfo.duration}</p>
-              <p className="text-gray-500">Duration</p>
+              <p className="font-medium text-slate-900 dark:text-slate-100">{videoInfo.duration}</p>
+              <p className="text-slate-500 dark:text-slate-400">Duration</p>
             </div>
             <div>
-              <p className="font-medium text-gray-900">
+              <p className="font-medium text-slate-900 dark:text-slate-100">
                 {chapters.length > 0 ? Math.round((chapters.length / parseFloat(videoInfo.duration.split(':')[0]) * 60 + parseFloat(videoInfo.duration.split(':')[1])) * 10) / 10 : 0}
               </p>
-              <p className="text-gray-500">Chapters/Hour</p>
+              <p className="text-slate-500 dark:text-slate-400">Chapters/Hour</p>
             </div>
             <div>
-              <p className="font-medium text-gray-900">
+              <p className="font-medium text-slate-900 dark:text-slate-100">
                 {chapters.reduce((total, chapter) => total + chapter.title.length, 0)}
               </p>
-              <p className="text-gray-500">Total Characters</p>
+              <p className="text-slate-500 dark:text-slate-400">Total Characters</p>
             </div>
           </div>
         </div>
