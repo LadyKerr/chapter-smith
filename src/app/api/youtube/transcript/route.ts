@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 // Note: youtube-transcript is imported dynamically to handle optional dependency
-import { 
-  APIResponse, 
-  YouTubeTranscriptResponse, 
+import {
+  APIResponse,
+  YouTubeTranscriptResponse,
   APIErrorCode,
   ValidationResult,
   TranscriptFetchOptions,
   YouTubeVideoInfo,
   YouTubeTranscriptSegment
 } from '../../../types/api';
+import { requireAuth, checkUserRateLimit } from '../../../lib/auth-utils';
 
 // Rate limiting configuration
 const RATE_LIMIT_REQUESTS = 100; // requests per hour
@@ -62,6 +63,39 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
+    // Require authentication
+    const session = await requireAuth(request);
+    const userId = session.user.id;
+
+    // Check rate limiting for authenticated user
+    const rateLimitCheck = await checkUserRateLimit(userId);
+    if (!rateLimitCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: APIErrorCode.RATE_LIMIT_EXCEEDED,
+            message: 'Rate limit exceeded. Please try again later.',
+            details: {
+              limit: rateLimitCheck.limit,
+              remaining: rateLimitCheck.remaining,
+              retryAfter: rateLimitCheck.retryAfter,
+            }
+          },
+          timestamp: new Date().toISOString(),
+          version: '1.0.0'
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': String(rateLimitCheck.limit),
+            'X-RateLimit-Remaining': String(rateLimitCheck.remaining),
+            'Retry-After': String(rateLimitCheck.retryAfter || 0),
+          }
+        }
+      );
+    }
+
     // Parse and validate request body
     body = await request.json();
     const validation = validateTranscriptRequest(body);
