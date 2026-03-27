@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { 
-  APIResponse, 
+import {
+  APIResponse,
   ExportRequest,
   ExportResponse,
   ExportFormat,
@@ -10,6 +10,7 @@ import {
   APIErrorCode,
   ValidationResult
 } from '../../../types/api';
+import { requireAuth, checkUserRateLimit } from '../../../lib/auth-utils';
 
 // Export format configurations
 const EXPORT_FORMATS: Record<ExportFormat, {
@@ -86,6 +87,39 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const requestId = generateRequestId();
 
   try {
+    // Require authentication
+    const session = await requireAuth(request);
+    const userId = session.user.id;
+
+    // Check rate limiting for authenticated user
+    const rateLimitCheck = await checkUserRateLimit(userId);
+    if (!rateLimitCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: APIErrorCode.RATE_LIMIT_EXCEEDED,
+            message: 'Rate limit exceeded. Please try again later.',
+            details: {
+              limit: rateLimitCheck.limit,
+              remaining: rateLimitCheck.remaining,
+              retryAfter: rateLimitCheck.retryAfter,
+            }
+          },
+          timestamp: new Date().toISOString(),
+          version: '1.0.0'
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': String(rateLimitCheck.limit),
+            'X-RateLimit-Remaining': String(rateLimitCheck.remaining),
+            'Retry-After': String(rateLimitCheck.retryAfter || 0),
+          }
+        }
+      );
+    }
+
     // Parse and validate request body
     const body: ExportRequest = await request.json();
     const validation = validateExportRequest(body);

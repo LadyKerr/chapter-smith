@@ -13,10 +13,12 @@ Turn any YouTube URL into polished, timestamped chapters
 
 Chapter Smith automatically generates professional-quality, timestamped chapters for any YouTube video. Simply paste a YouTube URL, or upload your SRT file and our AI-powered system:
 
+- **Authenticates** users via GitHub OAuth for secure access and personalized experience
 - **Extracts** video transcripts using YouTube's API with intelligent fallbacks
-- **Analyzes** content using Claude 3 Haiku to identify natural topic transitions  
+- **Analyzes** content using Claude 3 Haiku to identify natural topic transitions
 - **Generates** polished chapter titles, descriptions, and precise timestamps
 - **Exports** chapters in multiple formats (YouTube, SRT, JSON, CSV, XML, Markdown)
+- **Rate Limits** requests per user (100/hour authenticated, 10/hour anonymous)
 
 ### Why This Demo is Compelling
 
@@ -30,9 +32,10 @@ I chose to build this project because I've encountered this problem multiple tim
 
 ### Prerequisites
 
-- Node.js 20+ 
+- Node.js 20+
 - YouTube Data API v3 key
 - Anthropic API key
+- GitHub account (for authentication)
 
 ### 1. Clone and Install
 
@@ -50,7 +53,15 @@ Create `.env.local` in the project root:
 # Required API Keys
 YOUTUBE_API_KEY=your_youtube_api_key_here
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
+
+# Authentication (GitHub OAuth)
+NEXTAUTH_SECRET=your_nextauth_secret_here  # Generate with: openssl rand -base64 32
+NEXTAUTH_URL=http://localhost:3000
+GITHUB_CLIENT_ID=your_github_oauth_client_id
+GITHUB_CLIENT_SECRET=your_github_oauth_client_secret
 ```
+
+**GitHub OAuth Setup:** Follow the detailed guide in [AUTHENTICATION_SETUP.md](./AUTHENTICATION_SETUP.md) to create your GitHub OAuth app and configure authentication.
 
 ### 3. Start Development Server
 
@@ -151,18 +162,21 @@ NODE_ENV=production
 1. **Next.js App Router:** Leverages React Server Components for optimal performance
 2. **TypeScript Throughout:** 100% type safety from frontend to API endpoints
 3. **Modular API Design:** Each endpoint handles one responsibility with comprehensive error handling
-4. **AI Agent Architecture:** Copilot CLI operates as an autonomous sub-agent with specialized prompting
-5. **Graceful Degradation:** Multiple fallbacks for transcript fetching and error scenarios
-6. **Export Flexibility:** Supports 7+ export formats for maximum compatibility
+4. **GitHub OAuth Authentication:** Secure user authentication with NextAuth.js v5 and JWT sessions
+5. **Per-User Rate Limiting:** Protects API resources with 100 requests/hour for authenticated users
+6. **AI Agent Architecture:** Copilot CLI operates as an autonomous sub-agent with specialized prompting
+7. **Graceful Degradation:** Multiple fallbacks for transcript fetching and error scenarios
+8. **Export Flexibility:** Supports 7+ export formats for maximum compatibility
 
 ## Future Work
 
 Given more time, I would implement the following features:
-- full youtube api integration: there was a lot of sunken cost in implementing the url to chapter pipeline. MVP includes uploading a SRT file and getting chapters. Would love to spend time fixing the youtube api issue so that it can directly process video URLs.
-- add analytics to track user behavior and improve the system based on real-world usage patterns.
-- implement user authentication and authorization to personalize the experience and protect user data.
-- add a database to store user preferences and interaction history.
-- improve the ui to be more colorful and playful. Love the design, but it could use a bit more flair.
+- ✅ **User Authentication:** Implemented GitHub OAuth with NextAuth.js for secure access
+- Full youtube api integration: there was a lot of sunken cost in implementing the url to chapter pipeline. MVP includes uploading a SRT file and getting chapters. Would love to spend time fixing the youtube api issue so that it can directly process video URLs.
+- Add analytics to track user behavior and improve the system based on real-world usage patterns.
+- Add a database to store user preferences, saved chapters, and interaction history.
+- Implement user dashboard with chapter history and usage statistics.
+- Improve the UI to be more colorful and playful. Love the design, but it could use a bit more flair.
 
 ## 🤝 Contributing
 
