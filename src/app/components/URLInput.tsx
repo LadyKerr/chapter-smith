@@ -18,6 +18,8 @@ export default function URLInput({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    let hideSuccessTimeout: number | undefined;
+
     const validationTimeout = window.setTimeout(() => {
       if (url.trim() === '') {
         setIsValid(null);
@@ -32,11 +34,16 @@ export default function URLInput({
       setShowError(!valid);
 
       if (valid) {
-        window.setTimeout(() => setShowSuccess(false), 2000);
+        hideSuccessTimeout = window.setTimeout(() => setShowSuccess(false), 2000);
       }
     }, 500);
 
-    return () => window.clearTimeout(validationTimeout);
+    return () => {
+      window.clearTimeout(validationTimeout);
+      if (hideSuccessTimeout) {
+        window.clearTimeout(hideSuccessTimeout);
+      }
+    };
   }, [url]);
 
   // Show error state when error prop changes

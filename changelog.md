@@ -15,7 +15,7 @@
   - Improved logging for debugging transcript fetch failures
 
 ### Technical Details
-- User prompt: `implement this feature`
+- User prompt: `Create a plan to implement dark mode` followed by `implement this feature`
 - Date: 2026-03-27
 - Modified theme setup in `src/app/layout.tsx` and `src/app/globals.css`
 - Restyled `src/app/components/ChapterSmithApp.tsx`, `src/app/components/URLInput.tsx`, `src/app/components/TranscriptLoader.tsx`, `src/app/components/SRTUpload.tsx`, `src/app/components/ChaptersList.tsx`, `src/app/components/ErrorDisplay.tsx`, `src/app/components/CopyButton.tsx`, and `src/app/components/ExportButton.tsx`
