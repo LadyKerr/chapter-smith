@@ -11,10 +11,6 @@ import {
 } from '../../../types/api';
 import { requireAuth, checkUserRateLimit } from '../../../lib/auth-utils';
 
-// Rate limiting configuration
-const RATE_LIMIT_REQUESTS = 100; // requests per hour
-const RATE_LIMIT_WINDOW = 3600; // 1 hour in seconds
-
 // Request body validation schema
 interface TranscriptRequest {
   url?: string;
@@ -117,17 +113,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         'Invalid YouTube URL or video ID',
         null,
         400
-      );
-    }
-
-    // Check rate limiting
-    const rateLimitCheck = await checkRateLimit(request);
-    if (!rateLimitCheck.allowed) {
-      return createErrorResponse(
-        APIErrorCode.RATE_LIMIT_EXCEEDED,
-        'Rate limit exceeded',
-        { retryAfter: rateLimitCheck.retryAfter },
-        429
       );
     }
 
@@ -669,19 +654,6 @@ async function fetchTranscriptFallback(
 }
 
 /**
- * Check rate limiting for the current request
- */
-async function checkRateLimit(request: NextRequest): Promise<{ allowed: boolean; retryAfter?: number }> {
-  // Get client identifier (IP address or user ID)
-  getClientIdentifier(request);
-  
-  // In a real implementation, you would use Redis or similar for rate limiting
-  // This is a simplified in-memory example
-  
-  return { allowed: true }; // Mock implementation
-}
-
-/**
  * Check YouTube API quota availability
  */
 async function checkYouTubeQuota(): Promise<{ available: boolean; resetTime?: number }> {
@@ -708,15 +680,6 @@ function parseDurationToSeconds(duration: string): number {
  */
 function generateRequestId(): string {
   return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
-
-/**
- * Get client identifier for rate limiting
- */
-function getClientIdentifier(request: NextRequest): string {
-  // Try to get user ID from session/auth
-  // Fallback to IP address
-  return request.ip || request.headers.get('x-forwarded-for') || 'anonymous';
 }
 
 /**
