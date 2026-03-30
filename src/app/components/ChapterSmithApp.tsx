@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { Chapter, VideoInfo, ProcessingState, UploadState, ValidationError } from '../types';
 import { api } from '../utils';
@@ -25,7 +25,7 @@ function getUserDisplayInfo(user?: { name?: string | null; email?: string | null
 
 export default function ChapterSmithApp() {
   const { data: session, status } = useSession();
-  const userDisplayInfo = getUserDisplayInfo(session?.user);
+  const userDisplayInfo = useMemo(() => getUserDisplayInfo(session?.user), [session?.user]);
   const [appState, setAppState] = useState<AppState>('input');
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
