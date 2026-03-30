@@ -20,9 +20,9 @@ function getUserDisplayInfo(user?: { name?: string | null; email?: string | null
   const displayName = user?.name || user?.email || accountConnectedLabel;
   let secondaryLabel = '';
 
-  if (user?.email && user.email !== displayName) {
+  if (user?.name && user?.email) {
     secondaryLabel = user.email;
-  } else if (user?.name) {
+  } else if (!user?.name && user?.email) {
     secondaryLabel = accountConnectedLabel;
   }
 
