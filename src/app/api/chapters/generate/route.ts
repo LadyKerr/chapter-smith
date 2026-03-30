@@ -10,7 +10,7 @@ import {
   AIModelConfig,
   ProcessingMetrics
 } from '../../../types/api';
-import { requireAuthenticatedSession } from '@/lib/api-auth';
+import { getUnauthenticatedResponse } from '@/lib/api-auth';
 
 // AI model configuration
 const DEFAULT_AI_CONFIG: AIModelConfig = {
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const requestId = generateRequestId();
   let videoId: string | undefined;
 
-  const unauthenticatedResponse = await requireAuthenticatedSession();
+  const unauthenticatedResponse = await getUnauthenticatedResponse();
   if (unauthenticatedResponse) {
     return unauthenticatedResponse;
   }

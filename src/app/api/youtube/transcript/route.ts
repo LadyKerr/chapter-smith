@@ -9,7 +9,7 @@ import {
   YouTubeVideoInfo,
   YouTubeTranscriptSegment
 } from '../../../types/api';
-import { requireAuthenticatedSession } from '@/lib/api-auth';
+import { getUnauthenticatedResponse } from '@/lib/api-auth';
 
 // Rate limiting configuration
 const RATE_LIMIT_REQUESTS = 100; // requests per hour
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   let body: TranscriptRequest;
   let videoId: string | undefined;
 
-  const unauthenticatedResponse = await requireAuthenticatedSession();
+  const unauthenticatedResponse = await getUnauthenticatedResponse();
   if (unauthenticatedResponse) {
     return unauthenticatedResponse;
   }

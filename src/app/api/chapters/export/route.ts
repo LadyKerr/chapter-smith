@@ -10,7 +10,7 @@ import {
   APIErrorCode,
   ValidationResult
 } from '../../../types/api';
-import { requireAuthenticatedSession } from '@/lib/api-auth';
+import { getUnauthenticatedResponse } from '@/lib/api-auth';
 
 // Export format configurations
 const EXPORT_FORMATS: Record<ExportFormat, {
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
   const requestId = generateRequestId();
 
-  const unauthenticatedResponse = await requireAuthenticatedSession();
+  const unauthenticatedResponse = await getUnauthenticatedResponse();
   if (unauthenticatedResponse) {
     return unauthenticatedResponse;
   }

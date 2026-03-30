@@ -17,6 +17,10 @@ type AppState = 'input' | 'processing' | 'upload' | 'chapters' | 'error';
 
 export default function ChapterSmithApp() {
   const { data: session, status } = useSession();
+  const userDisplayName = session?.user?.name || session?.user?.email || 'GitHub account connected';
+  const userSecondaryLabel = session?.user?.email && session.user.email !== userDisplayName
+    ? session.user.email
+    : 'GitHub account connected';
   const [appState, setAppState] = useState<AppState>('input');
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -268,8 +272,8 @@ export default function ChapterSmithApp() {
                   )}
 
                   <div className="hidden text-right sm:block">
-                    <p className="text-sm font-medium text-gray-900">{session.user.name || session.user.email}</p>
-                    <p className="text-xs text-gray-500">{session.user.email || 'GitHub account connected'}</p>
+                    <p className="text-sm font-medium text-gray-900">{userDisplayName}</p>
+                    <p className="text-xs text-gray-500">{userSecondaryLabel}</p>
                   </div>
 
                   <button

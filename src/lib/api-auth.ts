@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { APIErrorCode, APIResponse } from '@/app/types/api';
 
-export async function requireAuthenticatedSession(): Promise<NextResponse | null> {
+export async function getUnauthenticatedResponse(): Promise<NextResponse | null> {
   const session = await auth();
 
   if (session?.user) {
