@@ -15,15 +15,21 @@ import ErrorDisplay from './ErrorDisplay';
 
 type AppState = 'input' | 'processing' | 'upload' | 'chapters' | 'error';
 
-export default function ChapterSmithApp() {
-  const { data: session, status } = useSession();
+function getUserDisplayInfo(user?: { name?: string | null; email?: string | null }) {
   const accountConnectedLabel = 'GitHub account connected';
-  const userDisplayName = session?.user?.name || session?.user?.email || accountConnectedLabel;
-  const userSecondaryLabel = session?.user?.email && session.user.email !== userDisplayName
-    ? session.user.email
-    : session?.user?.name
+  const displayName = user?.name || user?.email || accountConnectedLabel;
+  const secondaryLabel = user?.email && user.email !== displayName
+    ? user.email
+    : user?.name
       ? accountConnectedLabel
       : '';
+
+  return { displayName, secondaryLabel };
+}
+
+export default function ChapterSmithApp() {
+  const { data: session, status } = useSession();
+  const userDisplayInfo = getUserDisplayInfo(session?.user);
   const [appState, setAppState] = useState<AppState>('input');
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -275,9 +281,9 @@ export default function ChapterSmithApp() {
                   )}
 
                   <div className="hidden text-right sm:block">
-                    <p className="text-sm font-medium text-gray-900">{userDisplayName}</p>
-                    {userSecondaryLabel && (
-                      <p className="text-xs text-gray-500">{userSecondaryLabel}</p>
+                    <p className="text-sm font-medium text-gray-900">{userDisplayInfo.displayName}</p>
+                    {userDisplayInfo.secondaryLabel && (
+                      <p className="text-xs text-gray-500">{userDisplayInfo.secondaryLabel}</p>
                     )}
                   </div>
 

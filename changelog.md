@@ -7,6 +7,7 @@
   - Added App Router auth handler configuration for GitHub OAuth
   - Wrapped the app in a shared session provider and added signed-in/signed-out UI states
   - Blocked protected API routes when no authenticated GitHub session is present
+  - Updated README environment variable documentation for GitHub OAuth setup
 
 ### Fixed
 - **YouTube Transcript Fallback**: Fixed issue where transcript fetching would fail with "No transcript available" error even in development mode. The fallback mechanism now properly returns mock data when YouTube's transcript APIs are unavailable, allowing development and testing without requiring videos with actual transcripts.
@@ -19,6 +20,3 @@
   - Line 419-421: Now calls `fetchTranscriptFallback` when library returns 0 segments
   - Lines 503-557: Added try-catch for JSON parsing and returns mock data on error
   - Added development mode checks to return mock data when no transcript is available
-- Modified `src/auth.ts`, `src/app/providers.tsx`, and `src/app/api/auth/[...nextauth]/route.ts` to add the GitHub Auth.js flow
-- Modified `src/app/components/ChapterSmithApp.tsx` and `src/app/utils/index.ts` to surface signed-in/signed-out behavior in the UI
-- User prompt: `Implement this plan`
