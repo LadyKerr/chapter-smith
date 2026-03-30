@@ -18,11 +18,13 @@ type AppState = 'input' | 'processing' | 'upload' | 'chapters' | 'error';
 function getUserDisplayInfo(user?: { name?: string | null; email?: string | null }) {
   const accountConnectedLabel = 'GitHub account connected';
   const displayName = user?.name || user?.email || accountConnectedLabel;
-  const secondaryLabel = user?.email && user.email !== displayName
-    ? user.email
-    : user?.name
-      ? accountConnectedLabel
-      : '';
+  let secondaryLabel = '';
+
+  if (user?.email && user.email !== displayName) {
+    secondaryLabel = user.email;
+  } else if (user?.name) {
+    secondaryLabel = accountConnectedLabel;
+  }
 
   return { displayName, secondaryLabel };
 }

@@ -179,7 +179,7 @@ https://your-domain.com/api/auth/callback/github
 ## Future Work
 
 Given more time, I would implement the following features:
-- Full youtube api integration: there was a lot of sunken cost in implementing the url to chapter pipeline. MVP includes uploading a SRT file and getting chapters. Would love to spend time fixing the youtube api issue so that it can directly process video URLs.
+- Full YouTube API integration: there was a lot of sunken cost in implementing the url to chapter pipeline. MVP includes uploading a SRT file and getting chapters. Would love to spend time fixing the youtube api issue so that it can directly process video URLs.
 - add analytics to track user behavior and improve the system based on real-world usage patterns.
 - add a database to store user preferences and interaction history.
 - improve the ui to be more colorful and playful. Love the design, but it could use a bit more flair.
