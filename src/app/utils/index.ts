@@ -232,6 +232,10 @@ export const api = {
         body: JSON.stringify({ url })
       });
 
+      if (response.status === 401) {
+        return { valid: false, error: 'Sign in with GitHub to continue.' };
+      }
+
       const result = await response.json();
       
       if (!result.success) {
@@ -278,6 +282,13 @@ export const api = {
         },
         body: JSON.stringify({ url })
       });
+
+      if (response.status === 401) {
+        return {
+          chapters: [],
+          error: 'Sign in with GitHub to continue.'
+        };
+      }
 
       const result = await response.json();
       
@@ -350,6 +361,15 @@ export const api = {
           }
         })
       });
+
+      if (response.status === 401) {
+        return {
+          content: '',
+          filename: '',
+          mimeType: '',
+          error: 'Sign in with GitHub to continue.'
+        };
+      }
 
       const result = await response.json();
       

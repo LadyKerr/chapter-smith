@@ -10,6 +10,7 @@ import {
   AIModelConfig,
   ProcessingMetrics
 } from '../../../types/api';
+import { getUnauthenticatedResponse } from '@/lib/api-auth';
 
 // AI model configuration
 const DEFAULT_AI_CONFIG: AIModelConfig = {
@@ -80,6 +81,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
   const requestId = generateRequestId();
   let videoId: string | undefined;
+
+  const unauthenticatedResponse = await getUnauthenticatedResponse();
+  if (unauthenticatedResponse) {
+    return unauthenticatedResponse;
+  }
 
   try {
     // Parse and validate request body

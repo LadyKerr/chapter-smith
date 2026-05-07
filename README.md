@@ -135,8 +135,17 @@ Read the full api documentation here [API Docs](/API_README.md)
 ```bash
 YOUTUBE_API_KEY=your_production_youtube_key
 ANTHROPIC_API_KEY=your_production_anthropic_key
+AUTH_GITHUB_ID=your_github_oauth_app_client_id
+AUTH_GITHUB_SECRET=your_github_oauth_app_client_secret
+AUTH_SECRET=your_generated_auth_secret
+AUTH_URL=https://your-domain.com
 NEXT_PUBLIC_APP_URL=https://your-domain.com
 NODE_ENV=production
+```
+
+**GitHub OAuth Callback URL:**
+```bash
+https://your-domain.com/api/auth/callback/github
 ```
 
 **Deployment Platforms:**
@@ -154,13 +163,24 @@ NODE_ENV=production
 4. **AI Agent Architecture:** Copilot CLI operates as an autonomous sub-agent with specialized prompting
 5. **Graceful Degradation:** Multiple fallbacks for transcript fetching and error scenarios
 6. **Export Flexibility:** Supports 7+ export formats for maximum compatibility
+7. **GitHub Authentication:** Auth.js secures chapter-generation workflows behind a GitHub sign-in flow
+
+## Authentication
+
+- Chapter Smith now uses **GitHub OAuth via Auth.js** for application access.
+- Users must sign in with GitHub before calling transcript, chapter generation, or export APIs.
+- Sessions use Auth.js JWT sessions, so no database is required for the initial authentication flow.
+- Required auth environment variables:
+  - `AUTH_GITHUB_ID`
+  - `AUTH_GITHUB_SECRET`
+  - `AUTH_SECRET`
+  - `AUTH_URL`
 
 ## Future Work
 
 Given more time, I would implement the following features:
-- full youtube api integration: there was a lot of sunken cost in implementing the url to chapter pipeline. MVP includes uploading a SRT file and getting chapters. Would love to spend time fixing the youtube api issue so that it can directly process video URLs.
+- Full YouTube API integration: there was a lot of sunken cost in implementing the url to chapter pipeline. MVP includes uploading a SRT file and getting chapters. Would love to spend time fixing the youtube api issue so that it can directly process video URLs.
 - add analytics to track user behavior and improve the system based on real-world usage patterns.
-- implement user authentication and authorization to personalize the experience and protect user data.
 - add a database to store user preferences and interaction history.
 - improve the ui to be more colorful and playful. Love the design, but it could use a bit more flair.
 
