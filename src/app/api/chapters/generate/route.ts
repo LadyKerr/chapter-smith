@@ -7,13 +7,33 @@ import {
   APIErrorCode,
   ValidationResult,
   YouTubeTranscriptSegment,
+  YouTubeTranscriptResponse,
+  YouTubeVideoInfo,
   AIModelConfig,
   ProcessingMetrics
 } from '../../../types/api';
 
+// Resolved chapter generation options (defaults applied)
+interface ChapterOptions {
+  minChapterLength: number;
+  maxChapters: number;
+  includeDescriptions: boolean;
+  language: string;
+}
+
+// Shape of a chapter as returned by the AI model before post-processing
+interface AIChapterCandidate {
+  title: string;
+  description?: string;
+  startTime: number;
+  endTime?: number;
+  confidence?: number;
+  keywords?: string[];
+}
+
 // AI model configuration
 const DEFAULT_AI_CONFIG: AIModelConfig = {
-  model: 'claude-3-haiku', // Using Claude 3 Haiku for faster, cost-effective processing
+  model: 'claude-haiku-4-5', // Using Claude 4 Haiku for faster, cost-effective processing
   temperature: 0.3,
   maxTokens: 4000,
   systemPrompt: `You are an expert at analyzing video transcripts and creating meaningful chapter divisions. 
@@ -106,7 +126,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     };
 
     let transcript: YouTubeTranscriptSegment[];
-    let videoInfo: any = null;
+    let videoInfo: YouTubeVideoInfo | null = null;
 
     // If transcript not provided, fetch it
     if (!body.transcript) {
@@ -132,9 +152,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       transcript = transcriptResponse.data.segments;
       videoInfo = {
+        id: transcriptResponse.data.videoId,
         title: transcriptResponse.data.title,
-        duration: transcriptResponse.data.duration,
-        id: transcriptResponse.data.videoId
+        description: '',
+        duration: transcriptResponse.data.duration.toString(),
+        channelTitle: '',
+        publishedAt: '',
+        thumbnailUrl: '',
+        url: body.url || `https://www.youtube.com/watch?v=${transcriptResponse.data.videoId}`
       };
     } else {
       transcript = body.transcript;
@@ -183,6 +208,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       videoInfo: videoInfo || {
         id: body.videoId || 'unknown',
         title: 'Untitled Video',
+        description: '',
         duration: totalDuration.toString(),
         channelTitle: '',
         publishedAt: '',
@@ -354,7 +380,7 @@ function validateChapterRequest(body: ChapterGenerationRequest): ValidationResul
 /**
  * Fetch transcript from our internal API
  */
-async function fetchTranscript(videoIdOrUrl: string): Promise<APIResponse<any>> {
+async function fetchTranscript(videoIdOrUrl: string): Promise<APIResponse<YouTubeTranscriptResponse>> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const response = await fetch(`${baseUrl}/api/youtube/transcript`, {
@@ -367,7 +393,7 @@ async function fetchTranscript(videoIdOrUrl: string): Promise<APIResponse<any>> 
       })
     });
 
-    return await response.json();
+    return await response.json() as APIResponse<YouTubeTranscriptResponse>;
   } catch (error) {
     return {
       success: false,
@@ -387,8 +413,8 @@ async function fetchTranscript(videoIdOrUrl: string): Promise<APIResponse<any>> 
  */
 async function generateChaptersWithAI(
   transcript: YouTubeTranscriptSegment[],
-  videoInfo: any,
-  options: any
+  videoInfo: YouTubeVideoInfo | null,
+  options: ChapterOptions
 ): Promise<GeneratedChapter[]> {
   const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
   if (!anthropicApiKey) {
@@ -517,7 +543,7 @@ async function generateChaptersWithAI(
     }
 
     const parsedResponse = JSON.parse(jsonMatch[0]);
-    const chapters = parsedResponse.chapters;
+    const chapters = parsedResponse.chapters as AIChapterCandidate[];
 
     if (!Array.isArray(chapters) || chapters.length === 0) {
       throw new AIServiceError(
@@ -529,7 +555,7 @@ async function generateChaptersWithAI(
     }
 
     // Convert to our chapter format
-    return chapters.map((chapter: any, index: number) => ({
+    return chapters.map((chapter, index) => ({
       id: generateChapterId(index),
       timestamp: formatTime(chapter.startTime),
       title: chapter.title,
@@ -558,7 +584,7 @@ async function generateChaptersWithAI(
 function postProcessChapters(
   chapters: GeneratedChapter[],
   totalDuration: number,
-  options: any
+  options: ChapterOptions
 ): GeneratedChapter[] {
   // Sort by start time
   chapters.sort((a, b) => a.startTime - b.startTime);
@@ -660,7 +686,7 @@ function createSuccessResponse<T>(data: T): NextResponse {
 function createErrorResponse(
   code: APIErrorCode,
   message: string,
-  details: any = null,
+  details: unknown = null,
   status: number = 500
 ): NextResponse {
   const response: APIResponse<never> = {
@@ -685,7 +711,7 @@ class AIServiceError extends Error {
   constructor(
     public code: APIErrorCode,
     message: string,
-    public details: any = null,
+    public details: unknown = null,
     public statusCode: number = 500
   ) {
     super(message);

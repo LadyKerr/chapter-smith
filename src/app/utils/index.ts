@@ -1,6 +1,6 @@
 // Utility functions for Chapter Smith
 
-import { Chapter, ExportFormat } from '../types';
+import { Chapter, ExportFormat, VideoInfo } from '../types';
 
 // YouTube URL validation
 export const validateYouTubeURL = (url: string): boolean => {
@@ -161,14 +161,14 @@ export const extractURLFromPaste = (event: ClipboardEvent): string | null => {
 };
 
 // Debounce function for input validation
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: never[]) => unknown>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
   let timeout: NodeJS.Timeout;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(null, args), wait);
+    timeout = setTimeout(() => func(...args), wait);
   };
 };
 
@@ -218,7 +218,7 @@ export const EXPORT_FORMATS: ExportFormat[] = [
 
 // Production API functions integrated with backend endpoints
 export const api = {
-  validateURL: async (url: string): Promise<{ valid: boolean; videoInfo?: any; error?: string }> => {
+  validateURL: async (url: string): Promise<{ valid: boolean; videoInfo?: VideoInfo; error?: string }> => {
     try {
       if (!validateYouTubeURL(url)) {
         return { valid: false, error: 'Invalid YouTube URL format' };
@@ -289,7 +289,7 @@ export const api = {
       }
 
       // Transform API response to expected format
-      const chapters: Chapter[] = result.data.chapters.map((chapter: any) => ({
+      const chapters: Chapter[] = result.data.chapters.map((chapter: Chapter) => ({
         id: chapter.id,
         timestamp: chapter.timestamp,
         title: chapter.title,
@@ -332,7 +332,7 @@ export const api = {
     }
   },
 
-  exportChapters: async (chapters: Chapter[], format: string, videoInfo?: any): Promise<{ content: string; filename: string; mimeType: string; error?: string }> => {
+  exportChapters: async (chapters: Chapter[], format: string, videoInfo?: VideoInfo): Promise<{ content: string; filename: string; mimeType: string; error?: string }> => {
     try {
       const response = await fetch('/api/chapters/export', {
         method: 'POST',

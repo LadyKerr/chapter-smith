@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.1.1] - 2026-07-20
+
+### Deployment readiness fixes
+
+**User prompt:** "I need to deploy this project, can you check if the project is ready to be deployed and let me know if it's not and what needs updating. Make a plan for the updates" → "ok start at phase 1 and continue until complete please"
+
+### Fixed
+- **Production build failure (12 TypeScript errors)**:
+  - `src/app/api/chapters/export/route.ts`: hoisted `body` declaration so the `catch` block can reference it; replaced a broken IIFE in the CSV header builder with `chapters.some(ch => ch.endTime !== undefined)`
+  - `src/app/api/chapters/generate/route.ts`: typed `videoInfo` as `YouTubeVideoInfo | null` and construct complete objects; added `description` to fallback videoInfo
+  - `src/app/api/youtube/transcript/route.ts`: `extractVideoIdFromUrl` null → undefined coercion; removed unsupported `country` option from `YoutubeTranscript.fetchTranscript`; replaced `request.ip` (removed in Next 15) with `x-forwarded-for` header parsing
+  - `src/app/components/ExportButton.tsx`: removed dead `disabled={exportState === 'exporting'}` checks inside blocks already guarded by `exportState !== 'exporting'`
+  - `src/app/components/ChapterSmithApp.tsx`: `setVideoInfo(... ?? null)` for `VideoInfo | undefined` → `VideoInfo | null`
+  - `src/app/types/api.ts`: made `ProcessingMetrics` fields optional so error-path metrics logging type-checks
+- **29 ESLint errors** (blocked `next build`): replaced all `any` types with proper types (`unknown`, `VideoInfo`, `Chapter`, `ChapterOptions`, `AIChapterCandidate`, typed metrics objects); escaped unescaped quotes/apostrophes in JSX (`ChaptersList.tsx`, `SRTUpload.tsx`); replaced `.apply()` with spread in `debounce` (`utils/index.ts`)
+
+### Security
+- Upgraded `next` 15.4.6 → 15.5.20 and `eslint-config-next` to match, resolving critical advisories (SSRF via middleware redirect handling GHSA-4342-x723-ch2f, RCE in React flight protocol GHSA-9qr9-h5gf-34mp)
+- `npm audit fix` resolved remaining fixable transitive vulnerabilities (tar, flatted, form-data, minimatch, js-yaml, ajv, brace-expansion)
+- Known remaining: 2 moderate advisories from `postcss` bundled inside Next.js itself — present in all current Next versions, not actionable downstream
+
+### Added
+- `.env.example` documenting required environment variables (`YOUTUBE_API_KEY`, `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_APP_URL`); `.gitignore` exception for it
+
+### Verified
+- `npx tsc --noEmit` clean, `next lint` 0 errors, `next build` succeeds
+- Production server smoke-tested: `/` 200, `/api/health` responds (reports `not_configured` without local keys, as designed), `/api/chapters/export` POST success and validation-error paths both work
+
 ## [Unreleased]
 
 ### Fixed

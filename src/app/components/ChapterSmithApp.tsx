@@ -51,7 +51,7 @@ export default function ChapterSmithApp() {
         throw new Error(urlValidation.error || 'Invalid URL');
       }
 
-      setVideoInfo(urlValidation.videoInfo);
+      setVideoInfo(urlValidation.videoInfo ?? null);
       setProcessingState({
         status: 'extracting',
         progress: 40,
@@ -90,8 +90,8 @@ export default function ChapterSmithApp() {
         setAppState('chapters');
       }, 1000);
 
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
       setAppState('error');
     }
   };
@@ -127,10 +127,10 @@ export default function ChapterSmithApp() {
         setAppState('chapters');
       }, 1000);
 
-    } catch (error: any) {
+    } catch (error) {
       setUploadState({
         status: 'error',
-        error: error.message
+        error: error instanceof Error ? error.message : 'An unexpected error occurred'
       });
     }
   };
