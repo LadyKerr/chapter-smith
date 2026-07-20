@@ -33,7 +33,7 @@ interface AIChapterCandidate {
 
 // AI model configuration
 const DEFAULT_AI_CONFIG: AIModelConfig = {
-  model: 'claude-haiku-4-5', // Using Claude 4 Haiku for faster, cost-effective processing
+  model: 'gpt-4o-mini', // Using GPT-4o mini for faster, cost-effective processing
   temperature: 0.3,
   maxTokens: 4000,
   systemPrompt: `You are an expert at analyzing video transcripts and creating meaningful chapter divisions. 
@@ -409,19 +409,19 @@ async function fetchTranscript(videoIdOrUrl: string): Promise<APIResponse<YouTub
 }
 
 /**
- * Generate chapters using AI (Claude/Anthropic)
+ * Generate chapters using AI (OpenAI)
  */
 async function generateChaptersWithAI(
   transcript: YouTubeTranscriptSegment[],
   videoInfo: YouTubeVideoInfo | null,
   options: ChapterOptions
 ): Promise<GeneratedChapter[]> {
-  const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
-  if (!anthropicApiKey) {
+  const openaiApiKey = process.env.OPENAI_API_KEY;
+  if (!openaiApiKey) {
     throw new AIServiceError(
       APIErrorCode.AI_SERVICE_UNAVAILABLE,
       'AI service not configured',
-      { service: 'anthropic' },
+      { service: 'openai' },
       503
     );
   }
@@ -442,20 +442,22 @@ async function generateChaptersWithAI(
     .replace('{includeDescriptions}', options.includeDescriptions.toString());
 
   try {
-    // Call Anthropic API
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Call OpenAI API
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': anthropicApiKey,
-        'anthropic-version': '2023-06-01'
+        'Authorization': `Bearer ${openaiApiKey}`
       },
       body: JSON.stringify({
         model: DEFAULT_AI_CONFIG.model,
         max_tokens: DEFAULT_AI_CONFIG.maxTokens,
         temperature: DEFAULT_AI_CONFIG.temperature,
-        system: DEFAULT_AI_CONFIG.systemPrompt,
         messages: [
+          {
+            role: 'system',
+            content: DEFAULT_AI_CONFIG.systemPrompt
+          },
           {
             role: 'user',
             content: userPrompt
@@ -466,7 +468,7 @@ async function generateChaptersWithAI(
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('Anthropic API error:', { status: response.status, error: errorData });
+      console.error('OpenAI API error:', { status: response.status, error: errorData });
       
       // In development, return mock chapters when AI service is unavailable
       if (process.env.NODE_ENV === 'development') {
@@ -520,7 +522,7 @@ async function generateChaptersWithAI(
     }
 
     const data = await response.json();
-    const content = data.content?.[0]?.text;
+    const content = data.choices?.[0]?.message?.content;
 
     if (!content) {
       throw new AIServiceError(

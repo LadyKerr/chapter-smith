@@ -223,7 +223,7 @@ export interface TranscriptFetchOptions {
 
 // Chapter Generation AI Model Configuration
 export interface AIModelConfig {
-  model: string; // e.g., 'gpt-4', 'claude-3'
+  model: string; // e.g., 'gpt-4o-mini', 'gpt-4o'
   temperature?: number;
   maxTokens?: number;
   systemPrompt?: string;

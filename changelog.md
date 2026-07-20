@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.2.0] - 2026-07-20
+
+### Switched AI provider from Anthropic (Claude) to OpenAI
+
+**User prompt:** "project needs to switch to using openai apikey instead of claude key" → "ye lets make the switch use subagents to help"
+
+### Changed
+- `src/app/api/chapters/generate/route.ts`: `generateChaptersWithAI` now calls OpenAI chat completions (`https://api.openai.com/v1/chat/completions`) with `Authorization: Bearer` auth, model `gpt-4o-mini`, system prompt moved into the `messages` array; response parsed from `choices[0].message.content`. Reads `OPENAI_API_KEY`.
+- `src/app/api/health/route.ts`: checks `OPENAI_API_KEY`, tests connectivity against `https://api.openai.com/v1/models`; `services.anthropic` response key renamed to `services.openai` (no external consumers — verified by grep)
+- `.env.example` and `README.md`: `ANTHROPIC_API_KEY` → `OPENAI_API_KEY`, provider docs/links/pricing updated
+- `src/app/types/api.ts`: model example comment updated
+
+### Removed
+- `@anthropic-ai/sdk` dependency (was unused — the API was always called via raw `fetch`)
+
+### Verified
+- `tsc --noEmit` clean, lint 0 errors, `next build` green
+- Live smoke test with real `OPENAI_API_KEY`: `/api/health` reports `openai: "up"`; `/api/chapters/generate` produced real chapters end-to-end via gpt-4o-mini
+
 ## [0.1.1] - 2026-07-20
 
 ### Deployment readiness fixes
