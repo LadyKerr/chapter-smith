@@ -115,7 +115,7 @@ export interface APIErrorResponse {
   error: {
     code: string;
     message: string;
-    details?: any;
+    details?: unknown;
     stack?: string; // Only in development
   };
   timestamp: string;
@@ -135,7 +135,7 @@ export interface ValidationError {
   field: string;
   code: string;
   message: string;
-  value?: any;
+  value?: unknown;
 }
 
 export interface ValidationWarning {
@@ -223,7 +223,7 @@ export interface TranscriptFetchOptions {
 
 // Chapter Generation AI Model Configuration
 export interface AIModelConfig {
-  model: string; // e.g., 'gpt-4', 'claude-3'
+  model: string; // e.g., 'gpt-4o-mini', 'gpt-4o'
   temperature?: number;
   maxTokens?: number;
   systemPrompt?: string;
@@ -246,19 +246,19 @@ export enum WebhookEvent {
 
 export interface WebhookPayload {
   event: WebhookEvent;
-  data: any;
+  data: unknown;
   timestamp: string;
   requestId: string;
 }
 
 // Analytics and Metrics Types
 export interface ProcessingMetrics {
-  transcriptFetchTimeMs: number;
+  transcriptFetchTimeMs?: number;
   chapterGenerationTimeMs: number;
-  totalProcessingTimeMs: number;
-  transcriptLength: number;
-  chaptersGenerated: number;
-  aiModel: string;
+  totalProcessingTimeMs?: number;
+  transcriptLength?: number;
+  chaptersGenerated?: number;
+  aiModel?: string;
   success: boolean;
 }
 

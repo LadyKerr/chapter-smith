@@ -6,7 +6,7 @@ Turn any YouTube URL into polished, timestamped chapters
 
 ![Next.js](https://img.shields.io/badge/Next.js-15.4.6-black?logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)
-![Anthropic Claude](https://img.shields.io/badge/Anthropic-Claude%203%20Haiku-orange)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o%20mini-orange)
 ![YouTube API](https://img.shields.io/badge/YouTube-Data%20API%20v3-red?logo=youtube)
 
 ## 🎯 What This Demo Does
@@ -14,7 +14,7 @@ Turn any YouTube URL into polished, timestamped chapters
 Chapter Smith automatically generates professional-quality, timestamped chapters for any YouTube video. Simply paste a YouTube URL, or upload your SRT file and our AI-powered system:
 
 - **Extracts** video transcripts using YouTube's API with intelligent fallbacks
-- **Analyzes** content using Claude 3 Haiku to identify natural topic transitions  
+- **Analyzes** content using GPT-4o mini to identify natural topic transitions  
 - **Generates** polished chapter titles, descriptions, and precise timestamps
 - **Exports** chapters in multiple formats (YouTube, SRT, JSON, CSV, XML, Markdown)
 
@@ -32,7 +32,7 @@ I chose to build this project because I've encountered this problem multiple tim
 
 - Node.js 20+ 
 - YouTube Data API v3 key
-- Anthropic API key
+- OpenAI API key
 
 ### 1. Clone and Install
 
@@ -49,7 +49,7 @@ Create `.env.local` in the project root:
 ```bash
 # Required API Keys
 YOUTUBE_API_KEY=your_youtube_api_key_here
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 ### 3. Start Development Server
@@ -87,15 +87,15 @@ Read the full api documentation here [API Docs](/API_README.md)
 - Video details: 1 unit per request
 - Request quota increases via Google Cloud Console
 
-### Anthropic API Setup
+### OpenAI API Setup
 
-1. Visit [Anthropic Console](https://console.anthropic.com/)
+1. Visit [OpenAI Platform](https://platform.openai.com/)
 2. Create account and verify email
-3. Generate API key in dashboard
+3. Generate API key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 4. Monitor usage and billing
 
-**Model Used:** Claude 3 Haiku
-- **Cost:** $0.25/1M input tokens, $1.25/1M output tokens
+**Model Used:** GPT-4o mini
+- **Cost:** $0.15/1M input tokens, $0.60/1M output tokens
 - **Speed:** Optimized for fast, cost-effective processing
 - **Rate Limits:** 50 requests/minute, 40,000 tokens/minute
 
@@ -106,11 +106,12 @@ Read the full api documentation here [API Docs](/API_README.md)
 ```json
 {
   "react": "19.1.0",
-  "next": "15.4.6", 
-  "@anthropic-ai/sdk": "^0.24.0",
+  "next": "^15.5.20",
   "youtube-transcript": "^1.2.1"
 }
 ```
+
+The OpenAI API is called directly via `fetch` — no SDK dependency needed.
 
 ### Technical Architecture
 
@@ -120,7 +121,7 @@ Read the full api documentation here [API Docs](/API_README.md)
 │   React/Next.js │◄──►│   Routes         │◄──►│   Services      │
 │                 │    │                  │    │                 │
 │ • URL Input     │    │ • /youtube/      │    │ • YouTube API   │
-│ • Progress UI   │    │   transcript     │    │ • Anthropic API │
+│ • Progress UI   │    │   transcript     │    │ • OpenAI API    │
 │ • Chapter List  │    │ • /chapters/     │    │ • Transcript    │
 │ • Export Tools  │    │   generate       │    │   Services      │
 └─────────────────┘    │ • /chapters/     │    └─────────────────┘
@@ -134,7 +135,7 @@ Read the full api documentation here [API Docs](/API_README.md)
 **Environment Variables for Production:**
 ```bash
 YOUTUBE_API_KEY=your_production_youtube_key
-ANTHROPIC_API_KEY=your_production_anthropic_key
+OPENAI_API_KEY=your_production_openai_key
 NEXT_PUBLIC_APP_URL=https://your-domain.com
 NODE_ENV=production
 ```

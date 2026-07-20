@@ -84,10 +84,11 @@ const EXPORT_FORMATS: Record<ExportFormat, {
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
   const requestId = generateRequestId();
+  let body: ExportRequest | undefined;
 
   try {
     // Parse and validate request body
-    const body: ExportRequest = await request.json();
+    body = await request.json() as ExportRequest;
     const validation = validateExportRequest(body);
     
     if (!validation.isValid) {
@@ -431,7 +432,7 @@ function generateJSONFormat(
   videoInfo?: YouTubeVideoInfo,
   options?: Required<ExportOptions>
 ): string {
-  const data: any = {
+  const data: Record<string, unknown> = {
     chapters: chapters.map(chapter => ({
       id: chapter.id,
       title: chapter.title,
@@ -470,7 +471,7 @@ function generateCSVFormat(
     'Timestamp',
     'Title',
     'Start Time (seconds)',
-    ...(chapter => chapter.endTime !== undefined ? ['End Time (seconds)'] : [])(),
+    ...(chapters.some(ch => ch.endTime !== undefined) ? ['End Time (seconds)'] : []),
     ...(options?.includeDescriptions ? ['Description'] : []),
     ...(chapters.some(ch => ch.confidence !== undefined) ? ['Confidence'] : []),
     ...(chapters.some(ch => ch.keywords && ch.keywords.length > 0) ? ['Keywords'] : [])
@@ -719,7 +720,15 @@ function generateRequestId(): string {
 /**
  * Log export metrics
  */
-async function logExportMetrics(metrics: any): Promise<void> {
+async function logExportMetrics(metrics: {
+  requestId: string;
+  format: string;
+  chaptersCount: number;
+  contentSize?: number;
+  processingTimeMs: number;
+  success: boolean;
+  error?: string;
+}): Promise<void> {
   // In production, send to analytics service, database, or monitoring system
   console.log('Export metrics:', metrics);
 }
@@ -744,7 +753,7 @@ function createSuccessResponse<T>(data: T): NextResponse {
 function createErrorResponse(
   code: APIErrorCode,
   message: string,
-  details: any = null,
+  details: unknown = null,
   status: number = 500
 ): NextResponse {
   const response: APIResponse<never> = {

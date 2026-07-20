@@ -76,7 +76,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Extract video ID from URL or use provided videoId
-    videoId = body.videoId || extractVideoIdFromUrl(body.url!);
+    videoId = body.videoId || extractVideoIdFromUrl(body.url!) || undefined;
     if (!videoId) {
       return createErrorResponse(
         APIErrorCode.INVALID_VIDEO_ID,
@@ -410,8 +410,7 @@ async function fetchTranscript(
     // Fetch transcript using the library
     console.log(`Fetching transcript with language: ${options?.languages?.[0] || 'en'}`);
     const transcriptData = await YoutubeTranscript.fetchTranscript(videoId, {
-      lang: options?.languages?.[0] || 'en',
-      country: 'US'
+      lang: options?.languages?.[0] || 'en'
     });
     
     console.log(`Transcript data received: ${transcriptData?.length || 0} segments`);
@@ -681,8 +680,8 @@ function generateRequestId(): string {
  */
 function getClientIdentifier(request: NextRequest): string {
   // Try to get user ID from session/auth
-  // Fallback to IP address
-  return request.ip || request.headers.get('x-forwarded-for') || 'anonymous';
+  // Fallback to IP address from forwarded headers (NextRequest has no `ip` in Next 15)
+  return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'anonymous';
 }
 
 /**

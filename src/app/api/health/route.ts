@@ -13,12 +13,12 @@ export async function GET(): Promise<NextResponse> {
   try {
     // Check environment variables
     const youtubeApiKey = process.env.YOUTUBE_API_KEY;
-    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+    const openaiApiKey = process.env.OPENAI_API_KEY;
 
     // Basic service checks
     const services = {
       youtube: youtubeApiKey ? 'configured' : 'not_configured',
-      anthropic: anthropicApiKey ? 'configured' : 'not_configured',
+      openai: openaiApiKey ? 'configured' : 'not_configured',
       database: 'not_applicable', // No database in current setup
       redis: 'not_applicable'     // No Redis in current setup
     };
@@ -39,19 +39,18 @@ export async function GET(): Promise<NextResponse> {
       }
     }
 
-    if (anthropicApiKey) {
+    if (openaiApiKey) {
       try {
-        const testResponse = await fetch('https://api.anthropic.com/v1/models', {
+        const testResponse = await fetch('https://api.openai.com/v1/models', {
           method: 'HEAD',
           headers: {
-            'x-api-key': anthropicApiKey,
-            'anthropic-version': '2023-06-01'
+            'Authorization': `Bearer ${openaiApiKey}`
           },
           signal: AbortSignal.timeout(5000) // 5 second timeout
         });
-        services.anthropic = testResponse.ok ? 'up' : 'degraded';
+        services.openai = testResponse.ok ? 'up' : 'degraded';
       } catch (error) {
-        services.anthropic = 'down';
+        services.openai = 'down';
       }
     }
 
@@ -96,7 +95,7 @@ export async function GET(): Promise<NextResponse> {
       error: 'Health check failed',
       services: {
         youtube: 'unknown',
-        anthropic: 'unknown',
+        openai: 'unknown',
         database: 'not_applicable',
         redis: 'not_applicable'
       },
