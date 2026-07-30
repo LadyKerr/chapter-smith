@@ -10,6 +10,7 @@ import {
   APIErrorCode,
   ValidationResult
 } from '../../../types/api';
+import { sanitizeErrorDetails } from '../../../utils/sanitize';
 
 // Export format configurations
 const EXPORT_FORMATS: Record<ExportFormat, {
@@ -761,7 +762,7 @@ function createErrorResponse(
     error: {
       code,
       message,
-      details,
+      details: sanitizeErrorDetails(details),
       ...(process.env.NODE_ENV === 'development' && { stack: new Error().stack })
     },
     timestamp: new Date().toISOString(),

@@ -12,6 +12,7 @@ import {
   AIModelConfig,
   ProcessingMetrics
 } from '../../../types/api';
+import { sanitizeErrorDetails } from '../../../utils/sanitize';
 
 // Resolved chapter generation options (defaults applied)
 interface ChapterOptions {
@@ -696,7 +697,7 @@ function createErrorResponse(
     error: {
       code,
       message,
-      details,
+      details: sanitizeErrorDetails(details),
       ...(process.env.NODE_ENV === 'development' && { stack: new Error().stack })
     },
     timestamp: new Date().toISOString(),

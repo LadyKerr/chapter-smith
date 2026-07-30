@@ -9,6 +9,7 @@ import {
   YouTubeVideoInfo,
   YouTubeTranscriptSegment
 } from '../../../types/api';
+import { sanitizeErrorDetails } from '../../../utils/sanitize';
 
 // Rate limiting configuration
 const RATE_LIMIT_REQUESTS = 100; // requests per hour
@@ -334,17 +335,15 @@ async function fetchVideoInfo(videoId: string): Promise<YouTubeVideoInfo | null>
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`YouTube API error: ${response.status} - ${errorText}`);
+      await response.text(); // Consume response body
+      console.error(`YouTube API error: ${response.status} - [response body redacted]`);
       
       throw new YouTubeAPIError(
         APIErrorCode.EXTERNAL_SERVICE_ERROR,
         `YouTube API error: ${response.status}`,
         { 
           status: response.status, 
-          statusText: response.statusText,
-          errorBody: errorText,
-          url: url
+          statusText: response.statusText
         },
         response.status
       );
@@ -727,7 +726,7 @@ function createErrorResponse(
     error: {
       code,
       message,
-      details,
+      details: sanitizeErrorDetails(details),
       ...(process.env.NODE_ENV === 'development' && { stack: new Error().stack })
     },
     timestamp: new Date().toISOString(),
